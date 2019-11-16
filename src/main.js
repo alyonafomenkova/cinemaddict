@@ -1,3 +1,4 @@
+import {generateCard} from './data.js';
 import {getRandomNumber} from './util.js';
 import makeFilter from './make-filter.js';
 import makeCard from './make-card.js';
@@ -21,17 +22,6 @@ const FILTERS = [
     count: 8
   }
 ];
-const FILM = {
-  title: `Moonrise`,
-  rating: `6.1`,
-  year: `1948`,
-  duration: `1h 30m`,
-  genre: `Nuar`,
-  description: `Danny Hawkins, has a tragic past. He makes an unintentional murder,
-                saving the girl from the hands of scoundrels. Facing a painful choice,
-                he tries to flee not only from the police, but from himself.`,
-  comments: 7
-};
 const CountOfFilms = {
   COMMON: 7,
   EXTRA: 2,
@@ -50,10 +40,10 @@ const renderFilters = (filters) => {
   });
 };
 
-const renderCards = (container, count, film, isControls = false) => {
+const renderCards = (container, count, isControls = false) => {
   for (let i = 0; i < count; i++) {
     container.insertAdjacentHTML(`beforeend`,
-    makeCard(film.title, film.rating, film.year, film.duration, film.genre, film.description, film.comments, isControls));
+        makeCard(generateCard(), isControls));
   }
 };
 
@@ -65,7 +55,7 @@ const updateCards = () => {
     const count = getRandomNumber(CountOfFilms.MIN, CountOfFilms.MAX);
 
     commonFilmsContainer.innerHTML = ``;
-    renderCards(commonFilmsContainer, count, FILM, true);
+    renderCards(commonFilmsContainer, count, true);
 
     filtersList.forEach((item) => {
       item.classList.remove(`main-navigation__item--active`);
@@ -79,7 +69,7 @@ const updateCards = () => {
 };
 
 renderFilters(FILTERS);
-renderCards(commonFilmsContainer, CountOfFilms.COMMON, FILM, true);
-renderCards(topRatedFilmsContainer, CountOfFilms.EXTRA, FILM);
-renderCards(mostCommentedFilmsContainer, CountOfFilms.EXTRA, FILM);
+renderCards(commonFilmsContainer, CountOfFilms.COMMON, true);
+renderCards(topRatedFilmsContainer, CountOfFilms.EXTRA);
+renderCards(mostCommentedFilmsContainer, CountOfFilms.EXTRA);
 updateCards();
