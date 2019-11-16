@@ -43,7 +43,7 @@ const renderFilters = (filters) => {
 const renderCards = (container, count, isControls = false) => {
   for (let i = 0; i < count; i++) {
     container.insertAdjacentHTML(`beforeend`,
-    makeCard(generateCard(), isControls));
+        makeCard(generateCard(), isControls));
   }
 };
 

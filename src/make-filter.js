@@ -6,5 +6,5 @@ export default (name, count, isChecked = false) => {
       ${name}
       ${count ? `<span class="main-navigation__item-count">${count}</span>` : ``}
   </a>
-  `
+  `;
 };
