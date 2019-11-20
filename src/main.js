@@ -1,7 +1,7 @@
 import {generateCard} from './data.js';
 import {getRandomNumber} from './util.js';
 import makeFilter from './make-filter.js';
-import makeCard from './make-card.js';
+import {Film} from './film.js';
 
 const FILTERS = [
   {
@@ -40,14 +40,15 @@ const renderFilters = (filters) => {
   });
 };
 
-const renderCards = (container, count, isControls = false) => {
+const renderFilms = (container, count) => {
   for (let i = 0; i < count; i++) {
-    container.insertAdjacentHTML(`beforeend`,
-        makeCard(generateCard(), isControls));
+    const film = generateCard();
+    const firstFilm = new Film(film);
+    firstFilm.render(container);
   }
 };
 
-const updateCards = () => {
+const updateFilms = () => {
   const filtersList = filtersContainer.querySelectorAll(`.main-navigation__item`);
   const onFiltersClick = (evt) => {
     evt.preventDefault();
@@ -55,7 +56,7 @@ const updateCards = () => {
     const count = getRandomNumber(CountOfFilms.MIN, CountOfFilms.MAX);
 
     commonFilmsContainer.innerHTML = ``;
-    renderCards(commonFilmsContainer, count, true);
+    renderFilms(commonFilmsContainer, count);
 
     filtersList.forEach((item) => {
       item.classList.remove(`main-navigation__item--active`);
@@ -69,7 +70,7 @@ const updateCards = () => {
 };
 
 renderFilters(FILTERS);
-renderCards(commonFilmsContainer, CountOfFilms.COMMON, true);
-renderCards(topRatedFilmsContainer, CountOfFilms.EXTRA);
-renderCards(mostCommentedFilmsContainer, CountOfFilms.EXTRA);
-updateCards();
+renderFilms(commonFilmsContainer, CountOfFilms.COMMON);
+renderFilms(topRatedFilmsContainer, CountOfFilms.EXTRA);
+renderFilms(mostCommentedFilmsContainer, CountOfFilms.EXTRA);
+updateFilms();
