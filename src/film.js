@@ -10,12 +10,22 @@ class Film {
     this._genre = data.genre;
     this._description = data.description;
     this._comments = data.comments;
-    this._isControls = data.isControls;
-
+    this._onCommentsClick = this._onCommentsClick.bind(this);
     this._element = null;
-    this._state = {
-      isDetails: false
-    };
+    this._onClick = null;
+  }
+
+  _onCommentsClick(evt) {
+    evt.preventDefault();
+    //console.log('_onCommentsClick');
+    if (typeof this._onClick === `function`) {
+      this._onClick();
+    }
+  }
+
+  set onClick(fn) {
+    //console.log('set onClick');
+    this._onClick = fn;
   }
 
   get template() {
@@ -39,13 +49,25 @@ class Film {
    </article>`.trim();
   }
 
-  render(container) {
-    if (this._element) {
-      container.removeChild(this._element);
-      this._element = null;
-    }
+  bind() {
+    //console.log('BIND');
+    this._element.querySelector(`.film-card__comments`).addEventListener(`click`, this._onCommentsClick);
+  }
+
+  unbind() {
+    //console.log('UNBIND');
+    this._element.querySelector(`.film-card__comments`).removeEventListener(`click`, this._onCommentsClick);
+  }
+
+  render() {
     this._element = createElement(this.template);
-    container.appendChild(this._element);
+    this.bind();
+    return this._element;
+  }
+
+  unrender() {
+    this.unbind();
+    this._element = null;
   }
 }
 

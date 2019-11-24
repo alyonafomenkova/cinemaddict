@@ -1,7 +1,9 @@
-import {generateCard} from './data.js';
-import {getRandomNumber} from './util.js';
+import {generatedFilms, CountOfFilms} from './data.js';
+import {getRandomNumber, getSubarray} from './util.js';
 import makeFilter from './make-filter.js';
 import {Film} from './film.js';
+import {FilmDetails} from './film-details.js';
+import {FilmStorage} from './film-storage.js';
 
 const FILTERS = [
   {
@@ -22,12 +24,6 @@ const FILTERS = [
     count: 8
   }
 ];
-const CountOfFilms = {
-  COMMON: 7,
-  EXTRA: 2,
-  MIN: 0,
-  MAX: 14
-};
 const filtersContainer = document.querySelector(`.main-navigation`);
 const filmsContainers = document.querySelectorAll(`.films-list__container`);
 const commonFilmsContainer = filmsContainers[0];
@@ -40,12 +36,15 @@ const renderFilters = (filters) => {
   });
 };
 
-const renderFilms = (container, count) => {
-  for (let i = 0; i < count; i++) {
-    const film = generateCard();
-    const firstFilm = new Film(film);
-    firstFilm.render(container);
-  }
+const renderFilms = (container, array) => {
+  array.forEach(element => {
+    const filmComponent = new Film(element);
+    container.appendChild(filmComponent.render());
+
+    const filmDetailsComponent = new FilmDetails(element);
+    filmComponent.onClick = () => {
+      body.appendChild(filmDetailsComponent.render());
+    };});
 };
 
 const updateFilms = () => {
@@ -54,9 +53,10 @@ const updateFilms = () => {
     evt.preventDefault();
     const target = evt.target;
     const count = getRandomNumber(CountOfFilms.MIN, CountOfFilms.MAX);
+    const newArray = getSubarray(generatedFilms, count);
 
     commonFilmsContainer.innerHTML = ``;
-    renderFilms(commonFilmsContainer, count);
+    renderFilms(commonFilmsContainer, newArray);
 
     filtersList.forEach((item) => {
       item.classList.remove(`main-navigation__item--active`);
@@ -70,7 +70,40 @@ const updateFilms = () => {
 };
 
 renderFilters(FILTERS);
-renderFilms(commonFilmsContainer, CountOfFilms.COMMON);
-renderFilms(topRatedFilmsContainer, CountOfFilms.EXTRA);
-renderFilms(mostCommentedFilmsContainer, CountOfFilms.EXTRA);
+renderFilms(commonFilmsContainer, generatedFilms);
+renderFilms(topRatedFilmsContainer, generatedFilms);
+renderFilms(mostCommentedFilmsContainer, generatedFilms);
 updateFilms();
+
+
+const body = document.querySelector(`body`);
+//const filmComponent = new Film(generateFilm());
+//const filmDetailsComponent = new FilmDetails(generateFilm());
+// console.log(`filmComponent: `, filmComponent);
+// console.log(`filmDetailsComponent: `, filmDetailsComponent);
+
+//commonFilmsContainer.appendChild(filmComponent.render());
+
+// filmComponent.onClick = () => {
+//   body.appendChild(filmDetailsComponent.render());
+// };
+
+// filmDetailsComponent.onClick = () => {
+//   //filmDetailsComponent.render();
+//   //commonFilmsContainer.replaceChild(filmDetailsComponent.element, filmComponent.element);
+//   //filmComponent.unrender();
+//   body.removeChild(filmDetailsComponent);
+//   filmDetailsComponent.unrender()
+// };
+
+const films = new FilmStorage();
+
+const onError = () => {
+  console.error(`Error loading films from server`);
+}
+
+const onSuccess = (films) => {
+  console.log(`Films onSuccess: `, films);
+}
+
+films.load(onError, onSuccess);
