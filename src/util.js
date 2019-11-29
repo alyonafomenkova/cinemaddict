@@ -29,4 +29,11 @@ const createElement = (template) => {
   return newElement.firstChild;
 };
 
-export {getRandomNumber, getRandomElement, getShuffledSubarray, getSubarray, createElement};
+const checkExists = (value, message) => {
+  if (value === null || typeof(value) === `undefined`) {
+    throw new Error(message);
+  }
+  return value;
+};
+
+export {getRandomNumber, getRandomElement, getShuffledSubarray, getSubarray, createElement, checkExists};
