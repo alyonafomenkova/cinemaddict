@@ -16,7 +16,6 @@
   --font-size-bigger: 20px;
 }
 
-
 html {
   background: #121213 url('../images/background.png') no-repeat 50% 0;
   display: flex;
@@ -42,6 +41,7 @@ html {
 }
 
 body {
+  position: relative;
   box-sizing: border-box;
   max-width: 1240px;
   padding: var(--vertical-gap) var(--horizontal-gap) 0;
@@ -397,7 +397,7 @@ a:hover {
   top: 0;
   right: 0;
   left: 10%;
-  z-index: 1;
+  z-index: 3;
   background-color: #212126;
   animation: bounceInRight 0.3s;
   box-shadow: -3px 2px 13px 0 #141628;
