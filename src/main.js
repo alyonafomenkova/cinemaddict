@@ -30,12 +30,12 @@ const filmsContainers = document.querySelectorAll(`.films-list__container`);
 const commonFilmsContainer = filmsContainers[0];
 const topRatedFilmsContainer = filmsContainers[1];
 const mostCommentedFilmsContainer = filmsContainers[2];
-
 const Group = {
   ALL: 0,
   TOP_RATED: 1,
   MOST_COMMENTED: 2
 };
+const films = new FilmStorage();
 
 const renderFilters = (filters) => {
   filters.reverse().forEach((item) => {
@@ -49,10 +49,10 @@ const updateFilms = () => {
     evt.preventDefault();
     const target = evt.target;
     const count = getRandomNumber(CountOfFilms.MIN, CountOfFilms.MAX);
-    const newArray = getSubarray(generatedFilms, count);
+    const newArray = getSubarray(films._films, count);
 
     commonFilmsContainer.innerHTML = ``;
-    renderFilms(commonFilmsContainer, newArray);
+    renderFilms(commonFilmsContainer, newArray, Group.ALL);
 
     filtersList.forEach((item) => {
       item.classList.remove(`main-navigation__item--active`);
@@ -64,13 +64,6 @@ const updateFilms = () => {
     item.addEventListener(`click`, onFiltersClick);
   });
 };
-
-renderFilters(FILTERS);
-// updateFilms();
-
-const films = new FilmStorage();
-console.log(typeof films);
-console.log(`films: `, films);
 
 const renderFilms = (container, films, group) => {
   const body = document.querySelector(`body`);
@@ -122,4 +115,6 @@ const onSuccess = (films) => {
   renderFilms(mostCommentedFilmsContainer, mostCommentedFilms, Group.MOST_COMMENTED);
 }
 
+renderFilters(FILTERS);
 films.load(onError, onSuccess);
+updateFilms();
