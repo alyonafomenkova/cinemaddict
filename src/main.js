@@ -1,7 +1,8 @@
-import {generateCard} from './data.js';
-import {getRandomNumber} from './util.js';
+import {CountOfFilms} from './data.js';
+import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
 import makeFilter from './make-filter.js';
-import makeCard from './make-card.js';
+import {FilmStorage} from './film-storage.js';
+import {ElementBuilder} from './element-builder.js';
 
 const FILTERS = [
   {
@@ -22,17 +23,17 @@ const FILTERS = [
     count: 8
   }
 ];
-const CountOfFilms = {
-  COMMON: 7,
-  EXTRA: 2,
-  MIN: 0,
-  MAX: 14
-};
 const filtersContainer = document.querySelector(`.main-navigation`);
 const filmsContainers = document.querySelectorAll(`.films-list__container`);
 const commonFilmsContainer = filmsContainers[0];
 const topRatedFilmsContainer = filmsContainers[1];
 const mostCommentedFilmsContainer = filmsContainers[2];
+const Group = {
+  ALL: 0,
+  TOP_RATED: 1,
+  MOST_COMMENTED: 2
+};
+const films = new FilmStorage();
 
 const renderFilters = (filters) => {
   filters.reverse().forEach((item) => {
@@ -40,22 +41,16 @@ const renderFilters = (filters) => {
   });
 };
 
-const renderCards = (container, count, isControls = false) => {
-  for (let i = 0; i < count; i++) {
-    container.insertAdjacentHTML(`beforeend`,
-        makeCard(generateCard(), isControls));
-  }
-};
-
-const updateCards = () => {
+const updateFilms = () => {
   const filtersList = filtersContainer.querySelectorAll(`.main-navigation__item`);
   const onFiltersClick = (evt) => {
     evt.preventDefault();
     const target = evt.target;
     const count = getRandomNumber(CountOfFilms.MIN, CountOfFilms.MAX);
+    const newArray = getSubarray(films._films, count);
 
     commonFilmsContainer.innerHTML = ``;
-    renderCards(commonFilmsContainer, count, true);
+    renderFilms(commonFilmsContainer, newArray, Group.ALL);
 
     filtersList.forEach((item) => {
       item.classList.remove(`main-navigation__item--active`);
@@ -68,8 +63,56 @@ const updateCards = () => {
   });
 };
 
+const renderFilms = (container, filmsArray, group) => {
+  const body = document.querySelector(`body`);
+
+  filmsArray.forEach((film) => {
+    const overlay = ElementBuilder.createOverlay();
+
+    const onDetailedFilmClick = () => {
+      body.removeChild(detailedFilmComponent);
+      body.removeChild(overlay);
+    };
+
+    const onSmallFilmClick = () => {
+      body.appendChild(overlay);
+      body.appendChild(detailedFilmComponent);
+    };
+
+    let filmComponent;
+
+    switch (group) {
+      case Group.ALL:
+        filmComponent = ElementBuilder.buildSmallFilmElement(film, onSmallFilmClick);
+        break;
+      case Group.TOP_RATED:
+        filmComponent = ElementBuilder.buildExtraSmallFilmElement(film, onSmallFilmClick);
+        break;
+      case Group.MOST_COMMENTED:
+        filmComponent = ElementBuilder.buildExtraSmallFilmElement(film, onSmallFilmClick);
+        break;
+      default:
+        throw new Error(`Unknown group type: ${group}`);
+    }
+
+    const detailedFilmComponent = ElementBuilder.buildDetailedFilmElement(film, onDetailedFilmClick);
+    container.appendChild(filmComponent);
+  });
+};
+
+const onError = () => {
+  throw new Error(`ERROR LOADING`);
+};
+
+const onSuccess = (filmsArray) => {
+  const topRatedFilms = getShuffledSubarray(filmsArray, CountOfFilms.EXTRA);
+  const mostCommentedFilms = getShuffledSubarray(filmsArray, CountOfFilms.EXTRA);
+
+  renderFilms(commonFilmsContainer, filmsArray, Group.ALL);
+  renderFilms(topRatedFilmsContainer, topRatedFilms, Group.TOP_RATED);
+  renderFilms(mostCommentedFilmsContainer, mostCommentedFilms, Group.MOST_COMMENTED);
+};
+
 renderFilters(FILTERS);
-renderCards(commonFilmsContainer, CountOfFilms.COMMON, true);
-renderCards(topRatedFilmsContainer, CountOfFilms.EXTRA);
-renderCards(mostCommentedFilmsContainer, CountOfFilms.EXTRA);
-updateCards();
+films.load(onError, onSuccess);
+updateFilms();

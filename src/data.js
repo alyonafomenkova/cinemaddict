@@ -36,7 +36,13 @@ const CommentsCount = {
   MIN: 0,
   MAX: 150
 };
-const generateCard = () => ({
+const CountOfFilms = {
+  COMMON: 7,
+  EXTRA: 2,
+  MIN: 0,
+  MAX: 14
+};
+const generateFilm = () => ({
   title: getRandomElement(title),
   posters: getRandomElement(posters),
   description: getShuffledSubarray(description, numberOfDescription),
@@ -47,4 +53,15 @@ const generateCard = () => ({
   comments: getRandomNumber(CommentsCount.MIN, CommentsCount.MAX)
 });
 
-export {generateCard};
+const generateFilms = (count) => {
+  const films = [];
+  for (let i = 0; i < count; i++) {
+    const film = generateFilm();
+    films.push(film);
+  }
+  return films;
+};
+
+const generatedFilms = generateFilms(CountOfFilms.COMMON);
+
+export {CountOfFilms, generatedFilms};
