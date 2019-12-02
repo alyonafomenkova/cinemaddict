@@ -30,7 +30,7 @@ const createElement = (template) => {
 };
 
 const checkExists = (value, message) => {
-  if (value === null || typeof(value) === `undefined`) {
+  if (value === null || typeof (value) === `undefined`) {
     throw new Error(message);
   }
   return value;

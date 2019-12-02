@@ -206,23 +206,23 @@ class ElementBuilder {
   static buildSmallFilmElement(film, clickListener) {
     const template = this.templateForSmallFilm(film);
     const element = createElement(template);
-    this.setClickListener(element, '.film-card__comments', clickListener)
+    this.setClickListener(element, `.film-card__comments`, clickListener);
     return element;
-  };
+  }
 
   static buildDetailedFilmElement(film, clickListener) {
     const template = this.templateForDetailedFilm(film);
     const element = createElement(template);
-    this.setClickListener(element, '.film-details__close', clickListener)
+    this.setClickListener(element, `.film-details__close`, clickListener);
     return element;
-  };
+  }
 
   static buildExtraSmallFilmElement(film, clickListener) {
     const template = this.templateForExtraSmallFilm(film);
     const element = createElement(template);
-    this.setClickListener(element, '.film-card__comments', clickListener)
+    this.setClickListener(element, `.film-card__comments`, clickListener);
     return element;
-  };
+  }
 
   static setClickListener(element, clickableAreaName, clickListener) {
     const clickableArea = element.querySelector(clickableAreaName);
@@ -238,7 +238,7 @@ class ElementBuilder {
   }
 
   static createOverlay() {
-    const template = `<div style="position:absolute;opacity:0.5;width:100%;height:100%;top:0;left:0;z-index:2;background:#00ff00;"></div>`;
+    const template = `<div style="position:absolute;opacity:0.5;width:100%;height:100%;top:0;left:0;z-index:2;background:transparent;"></div>`;
     const overlay = createElement(template);
     return overlay;
   }

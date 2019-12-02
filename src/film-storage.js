@@ -1,5 +1,4 @@
 import {generatedFilms} from "./data";
-console.log(`generatedFilms: `, generatedFilms);
 
 class FilmStorage {
   constructor() {
@@ -8,7 +7,7 @@ class FilmStorage {
 
   load(onError, onSuccess) {
     this._films = generatedFilms;
-    onSuccess(this._films)
+    onSuccess(this._films);
   }
 }
 

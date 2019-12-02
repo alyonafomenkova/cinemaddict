@@ -1,8 +1,6 @@
-import {generatedFilms, CountOfFilms} from './data.js';
-import {getRandomNumber, getShuffledSubarray, getSubarray, createElement} from './util.js';
+import {CountOfFilms} from './data.js';
+import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
 import makeFilter from './make-filter.js';
-import {Film} from './film.js';
-import {FilmDetails} from './film-details.js';
 import {FilmStorage} from './film-storage.js';
 import {ElementBuilder} from './element-builder.js';
 
@@ -65,10 +63,10 @@ const updateFilms = () => {
   });
 };
 
-const renderFilms = (container, films, group) => {
+const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
 
-  films.forEach(film => {
+  filmsArray.forEach((film) => {
     const overlay = ElementBuilder.createOverlay();
 
     const onDetailedFilmClick = () => {
@@ -79,13 +77,13 @@ const renderFilms = (container, films, group) => {
     const onSmallFilmClick = () => {
       body.appendChild(overlay);
       body.appendChild(detailedFilmComponent);
-    }
+    };
 
     let filmComponent;
 
     switch (group) {
       case Group.ALL:
-        filmComponent = ElementBuilder.buildSmallFilmElement(film, onSmallFilmClick)
+        filmComponent = ElementBuilder.buildSmallFilmElement(film, onSmallFilmClick);
         break;
       case Group.TOP_RATED:
         filmComponent = ElementBuilder.buildExtraSmallFilmElement(film, onSmallFilmClick);
@@ -100,20 +98,20 @@ const renderFilms = (container, films, group) => {
     const detailedFilmComponent = ElementBuilder.buildDetailedFilmElement(film, onDetailedFilmClick);
     container.appendChild(filmComponent);
   });
-}
+};
 
 const onError = () => {
-  console.log(`ERROR LOADING`);
-}
+  throw new Error(`ERROR LOADING`);
+};
 
-const onSuccess = (films) => {
-  const topRatedFilms = getShuffledSubarray(films, CountOfFilms.EXTRA);
-  const mostCommentedFilms = getShuffledSubarray(films, CountOfFilms.EXTRA);
+const onSuccess = (filmsArray) => {
+  const topRatedFilms = getShuffledSubarray(filmsArray, CountOfFilms.EXTRA);
+  const mostCommentedFilms = getShuffledSubarray(filmsArray, CountOfFilms.EXTRA);
 
-  renderFilms(commonFilmsContainer, films, Group.ALL);
+  renderFilms(commonFilmsContainer, filmsArray, Group.ALL);
   renderFilms(topRatedFilmsContainer, topRatedFilms, Group.TOP_RATED);
   renderFilms(mostCommentedFilmsContainer, mostCommentedFilms, Group.MOST_COMMENTED);
-}
+};
 
 renderFilters(FILTERS);
 films.load(onError, onSuccess);
