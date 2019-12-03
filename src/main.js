@@ -3,6 +3,7 @@ import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
 import makeFilter from './make-filter.js';
 import {FilmStorage} from './film-storage.js';
 import {ElementBuilder} from './element-builder.js';
+import {createElement} from './util.js';//
 
 const FILTERS = [
   {
@@ -77,6 +78,42 @@ const renderFilms = (container, filmsArray, group) => {
     const onSmallFilmClick = () => {
       body.appendChild(overlay);
       body.appendChild(detailedFilmComponent);
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      const emojiList = detailedFilmComponent.querySelector(`.film-details__emoji-list`);
+
+      const onEmojiClick = () => {
+        const emoji = emojiList.querySelector(`.film-details__emoji-item:checked + label`).textContent;
+        const previewEmoji = detailedFilmComponent.querySelector(`.film-details__add-emoji-label`);
+        previewEmoji.innerHTML = emoji;
+      };
+
+      emojiList.addEventListener(`click`, onEmojiClick);
+
+      function sendCommentListener (evt) {
+        const commentField = detailedFilmComponent.querySelector(`.film-details__comment-input`);
+        const commentsContainer = detailedFilmComponent.querySelector(`.film-details__comments-list`);
+
+
+        if (evt.ctrlKey && evt.keyCode === 13 && commentField.value) {
+          //const formData = new FormData(detailedFilmComponent.querySelector(`.film-details__inner`));
+          //console.log(`formData: `, formData);
+          const comment = {};
+          comment.emoji = detailedFilmComponent.querySelector(`.film-details__emoji-item:checked + label`).textContent;;
+          comment.text = commentField.value;
+          comment.author = `Leo Tolstoy`;
+          comment.date = Date.now();
+          console.log(`comment: `, comment);
+          const commentElement = createElement(ElementBuilder.templateForFilmComment(comment));
+          commentsContainer.appendChild(commentElement);
+
+          detailedFilmComponent.querySelector(`.film-details__add-emoji`).checked = false;
+          commentField.value = ``;
+        }
+      }
+
+      const commentComponent = ElementBuilder.buildFilmCommentElement(film.comments, sendCommentListener);
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     };
 
     let filmComponent;

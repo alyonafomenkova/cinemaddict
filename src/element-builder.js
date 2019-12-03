@@ -13,7 +13,7 @@ class ElementBuilder {
       </p>
       <img src="./images/posters/${film.posters}" alt="" class="film-card__poster">
       <p class="film-card__description">${film.description}</p>
-      <button class="film-card__comments">${film.comments} comments</button>
+      <button class="film-card__comments">${film.commentsCount} comments</button>
       <form class="film-card__controls">
         <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist">Add to watchlist</button>
         <button class="film-card__controls-item button film-card__controls-item--mark-as-watched">Mark as watched</button>
@@ -34,7 +34,7 @@ class ElementBuilder {
       </p>
       <img src="./images/posters/${film.posters}" alt="" class="film-card__poster">
       <p class="film-card__description">${film.description}</p>
-      <button class="film-card__comments">${film.comments} comments</button>
+      <button class="film-card__comments">${film.commentsCount} comments</button>
    </article>`.trim();
   }
 
@@ -114,20 +114,9 @@ class ElementBuilder {
       </section>
 
       <section class="film-details__comments-wrap">
-        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${film.comments}</span></h3>
+        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${film.commentsCount}</span></h3>
 
-        <ul class="film-details__comments-list">
-          <li class="film-details__comment">
-            <span class="film-details__comment-emoji">😴</span>
-            <div>
-              <p class="film-details__comment-text">So long-long story, boring!</p>
-              <p class="film-details__comment-info">
-                <span class="film-details__comment-author">Tim Macoveev</span>
-                <span class="film-details__comment-day">3 days ago</span>
-              </p>
-            </div>
-          </li>
-        </ul>
+        <ul class="film-details__comments-list">${this.templateForFilmComments(film.comments)}</ul>
 
         <div class="film-details__new-comment">
           <div>
@@ -203,10 +192,38 @@ class ElementBuilder {
   </section>`.trim();
   }
 
+  static templateForFilmComment(comment) {
+    return `
+    <li class="film-details__comment">
+      <span class="film-details__comment-emoji">${comment.emoji}</span>
+      <div>
+        <p class="film-details__comment-text">${comment.text}</p>
+        <p class="film-details__comment-info">
+          <span class="film-details__comment-author">${comment.author}</span>
+          <span class="film-details__comment-day">${comment.date}</span>
+        </p>
+      </div>
+    </li>`.trim();
+  }
+
+  static templateForFilmComments(comments) {
+    return comments.map((comment) =>
+      this.templateForFilmComment(comment)
+    ).join(``);
+  }
+
   static buildSmallFilmElement(film, clickListener) {
     const template = this.templateForSmallFilm(film);
     const element = createElement(template);
     this.setClickListener(element, `.film-card__comments`, clickListener);
+    return element;
+  }
+
+  static buildFilmCommentElement(comment, sendListener) {
+    const template = this.templateForFilmComment(comment);
+    const element = createElement(template);
+    const newCommentField = document.querySelector(`.film-details__new-comment`);
+    newCommentField.addEventListener(`keydown`, sendListener);
     return element;
   }
 

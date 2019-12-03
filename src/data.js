@@ -50,7 +50,21 @@ const generateFilm = () => ({
   year: getRandomNumber(YearsInterval.MIN, YearsInterval.MAX),
   duration: getRandomElement(duration),
   genre: getRandomElement(genre),
-  comments: getRandomNumber(CommentsCount.MIN, CommentsCount.MAX)
+  commentsCount: getRandomNumber(CommentsCount.MIN, CommentsCount.MAX),
+  comments: [
+    {
+      text: `So long-long story, boring!`,
+      author: `Tim Macoveev`,
+      emoji: `😴`,
+      date: Date.now(),
+    },
+    {
+      text: `Great!`,
+      author: `Anna Kim`,
+      emoji: `😀`,
+      date: Date.now(),
+    }
+  ]
 });
 
 const generateFilms = (count) => {
