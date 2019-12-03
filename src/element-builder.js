@@ -1,4 +1,5 @@
 import {createElement, checkExists} from './util.js';
+import moment from 'moment';
 
 class ElementBuilder {
   static templateForSmallFilm(film) {
@@ -7,8 +8,8 @@ class ElementBuilder {
       <h3 class="film-card__title">${film.title}</h3>
       <p class="film-card__rating">${film.rating}</p>
       <p class="film-card__info">
-        <span class="film-card__year">${film.year}</span>
-        <span class="film-card__duration">${film.duration}</span>
+        <span class="film-card__year">${moment(film.year).format(`YYYY`)}</span>
+        <span class="film-card__duration">${moment.utc(moment.duration(film.duration).asMilliseconds()).format("H:mm")}</span>
         <span class="film-card__genre">${film.genre}</span>
       </p>
       <img src="./images/posters/${film.posters}" alt="" class="film-card__poster">
@@ -28,8 +29,8 @@ class ElementBuilder {
       <h3 class="film-card__title">${film.title}</h3>
       <p class="film-card__rating">${film.rating}</p>
       <p class="film-card__info">
-        <span class="film-card__year">${film.year}</span>
-        <span class="film-card__duration">${film.duration}</span>
+        <span class="film-card__year">${moment(film.year).format(`YYYY`)}</span>
+        <span class="film-card__duration">${moment.utc(moment.duration(film.duration).asMilliseconds()).format("H:mm")}</span>
         <span class="film-card__genre">${film.genre}</span>
       </p>
       <img src="./images/posters/${film.posters}" alt="" class="film-card__poster">
@@ -80,11 +81,11 @@ class ElementBuilder {
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Release Date</td>
-              <td class="film-details__cell">${film.year}</td>
+              <td class="film-details__cell">${moment(film.year).format(`DD MMMM YYYY`)}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Runtime</td>
-              <td class="film-details__cell">${film.duration}</td>
+              <td class="film-details__cell">${Math.floor(moment.duration(film.duration).asMinutes())} min</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Country</td>
@@ -200,7 +201,7 @@ class ElementBuilder {
         <p class="film-details__comment-text">${comment.text}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${comment.author}</span>
-          <span class="film-details__comment-day">${comment.date}</span>
+          <span class="film-details__comment-day">${moment(comment.date).fromNow()}</span>
         </p>
       </div>
     </li>`.trim();
