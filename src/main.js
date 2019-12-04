@@ -113,6 +113,14 @@ const renderFilms = (container, filmsArray, group) => {
       }
 
       const commentComponent = ElementBuilder.buildFilmCommentElement(film.comments, sendCommentListener);
+
+      const onRatingClick = () => {
+        console.log(`onRatingClick`);
+        const userRating = detailedFilmComponent.querySelector(`.film-details__user-rating-input:checked`).value;
+        detailedFilmComponent.querySelector(`.film-details__user-rating span`).innerHTML = userRating;
+      };
+
+      detailedFilmComponent.querySelector(`.film-details__user-rating-score`).addEventListener(`click`, onRatingClick);
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     };
 

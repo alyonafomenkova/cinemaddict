@@ -6,7 +6,7 @@ class ElementBuilder {
     return `
     <article class="film-card">
       <h3 class="film-card__title">${film.title}</h3>
-      <p class="film-card__rating">${film.rating}</p>
+      <p class="film-card__rating">${film.totalRating}</p>
       <p class="film-card__info">
         <span class="film-card__year">${moment(film.year).format(`YYYY`)}</span>
         <span class="film-card__duration">${moment.utc(moment.duration(film.duration).asMilliseconds()).format("H:mm")}</span>
@@ -27,7 +27,7 @@ class ElementBuilder {
     return `
     <article class="film-card film-card--no-controls">
       <h3 class="film-card__title">${film.title}</h3>
-      <p class="film-card__rating">${film.rating}</p>
+      <p class="film-card__rating">${film.totalRating}</p>
       <p class="film-card__info">
         <span class="film-card__year">${moment(film.year).format(`YYYY`)}</span>
         <span class="film-card__duration">${moment.utc(moment.duration(film.duration).asMilliseconds()).format("H:mm")}</span>
@@ -61,8 +61,8 @@ class ElementBuilder {
             </div>
 
             <div class="film-details__rating">
-              <p class="film-details__total-rating">${film.rating}</p>
-              <p class="film-details__user-rating">Your rate 8</p>
+              <p class="film-details__total-rating">${film.totalRating}</p>
+              <p class="film-details__user-rating">Your rate <span>${film.userRating}</span></p>
             </div>
           </div>
 
@@ -158,33 +158,24 @@ class ElementBuilder {
             <p class="film-details__user-rating-feelings">How you feel it?</p>
 
             <div class="film-details__user-rating-score">
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="1" id="rating-1">
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="1" id="rating-1" ${film.userRating === 1 && `checked`}>
               <label class="film-details__user-rating-label" for="rating-1">1</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="2" id="rating-2">
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="2" id="rating-2" ${film.userRating === 2 && `checked`}>
               <label class="film-details__user-rating-label" for="rating-2">2</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="3" id="rating-3">
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="3" id="rating-3" ${film.userRating === 3 && `checked`}>
               <label class="film-details__user-rating-label" for="rating-3">3</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="4" id="rating-4">
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="4" id="rating-4" ${film.userRating === 4 && `checked`}>
               <label class="film-details__user-rating-label" for="rating-4">4</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="5" id="rating-5" checked>
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="5" id="rating-5" ${film.userRating === 5 && `checked`}>
               <label class="film-details__user-rating-label" for="rating-5">5</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="6" id="rating-6">
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="6" id="rating-6" ${film.userRating === 6 && `checked`}>
               <label class="film-details__user-rating-label" for="rating-6">6</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="7" id="rating-7">
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="7" id="rating-7" ${film.userRating === 7 && `checked`}>
               <label class="film-details__user-rating-label" for="rating-7">7</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="8" id="rating-8">
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="8" id="rating-8" ${film.userRating === 8 && `checked`}>
               <label class="film-details__user-rating-label" for="rating-8">8</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9">
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"value="9" id="rating-9" ${film.userRating === 9 && `checked`}>
               <label class="film-details__user-rating-label" for="rating-9">9</label>
-
             </div>
           </section>
         </div>

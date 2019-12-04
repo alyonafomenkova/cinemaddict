@@ -17,7 +17,9 @@ const description = DESCRIPTION_TEXT.split(`. `);
 const RatingInterval = {
   MIN: 2,
   MAX: 10,
-  STEP: 0.1
+  STEP: 0.1,
+  USER_RATING_MIN: 1,
+  USER_RATING_MAX: 9,
 };
 const generateRating = () => {
   const rating = [];
@@ -50,7 +52,8 @@ const generateFilm = () => ({
   title: getRandomElement(title),
   posters: getRandomElement(posters),
   description: getShuffledSubarray(description, numberOfDescription),
-  rating: getRandomElement(ratingArray),
+  totalRating: getRandomElement(ratingArray),
+  userRating: getRandomNumber(RatingInterval.USER_RATING_MIN, RatingInterval.USER_RATING_MAX),
   year: getRandomNumber(YearsInterval.MIN, YearsInterval.MAX),
   duration: getRandomNumber(DurationInterval.MIN, DurationInterval.MAX),
   genre: getRandomElement(genre),
