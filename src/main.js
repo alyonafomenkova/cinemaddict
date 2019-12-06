@@ -109,6 +109,11 @@ const renderFilms = (container, filmsArray, group) => {
 
           detailedFilmComponent.querySelector(`.film-details__add-emoji`).checked = false;
           commentField.value = ``;
+
+          console.log(`film.commentsCount: `, film.commentsCount);
+          film.commentsCount++;
+          console.log(`film.commentsCount: `, film.commentsCount);
+          // Обновить кол-во комментариев в detailed и в small
         }
       }
 
