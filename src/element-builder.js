@@ -1,4 +1,5 @@
 import {createElement, checkExists} from './util.js';
+import moment from 'moment';
 
 class ElementBuilder {
   static templateForSmallFilm(film) {
@@ -7,13 +8,13 @@ class ElementBuilder {
       <h3 class="film-card__title">${film.title}</h3>
       <p class="film-card__rating">${film.rating}</p>
       <p class="film-card__info">
-        <span class="film-card__year">${film.year}</span>
-        <span class="film-card__duration">${film.duration}</span>
+        <span class="film-card__year">${moment(film.year).format(`YYYY`)}</span>
+        <span class="film-card__duration">${moment.duration(film.duration).hours()}:${moment.duration(film.duration).minutes()}</span>
         <span class="film-card__genre">${film.genre}</span>
       </p>
       <img src="./images/posters/${film.posters}" alt="" class="film-card__poster">
       <p class="film-card__description">${film.description}</p>
-      <button class="film-card__comments">${film.comments} comments</button>
+      <button class="film-card__comments">${film.commentsCount} comments</button>
       <form class="film-card__controls">
         <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist">Add to watchlist</button>
         <button class="film-card__controls-item button film-card__controls-item--mark-as-watched">Mark as watched</button>
@@ -28,13 +29,13 @@ class ElementBuilder {
       <h3 class="film-card__title">${film.title}</h3>
       <p class="film-card__rating">${film.rating}</p>
       <p class="film-card__info">
-        <span class="film-card__year">${film.year}</span>
-        <span class="film-card__duration">${film.duration}</span>
+        <span class="film-card__year">${moment(film.year).format(`YYYY`)}</span>
+        <span class="film-card__duration">${moment.duration(film.duration).hours()}:${moment.duration(film.duration).minutes()}</span>
         <span class="film-card__genre">${film.genre}</span>
       </p>
       <img src="./images/posters/${film.posters}" alt="" class="film-card__poster">
       <p class="film-card__description">${film.description}</p>
-      <button class="film-card__comments">${film.comments} comments</button>
+      <button class="film-card__comments">${film.commentsCount} comments</button>
    </article>`.trim();
   }
 
@@ -49,46 +50,46 @@ class ElementBuilder {
         <div class="film-details__poster">
           <img class="film-details__poster-img" src="images/posters/${film.posters}" alt="${film.posters}">
 
-          <p class="film-details__age">18+</p>
+          <p class="film-details__age">${film.restriction}+</p>
         </div>
 
         <div class="film-details__info">
           <div class="film-details__info-head">
             <div class="film-details__title-wrap">
               <h3 class="film-details__title">${film.title}</h3>
-              <p class="film-details__title-original">Original: Невероятная семейка</p>
+              <p class="film-details__title-original">Original: ${film.title}</p>
             </div>
 
             <div class="film-details__rating">
               <p class="film-details__total-rating">${film.rating}</p>
-              <p class="film-details__user-rating">Your rate 8</p>
+              <p class="film-details__user-rating">Your rate <span>${film.userRating}</span></p>
             </div>
           </div>
 
           <table class="film-details__table">
             <tr class="film-details__row">
               <td class="film-details__term">Director</td>
-              <td class="film-details__cell">Brad Bird</td>
+              <td class="film-details__cell">${film.director}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Writers</td>
-              <td class="film-details__cell">Brad Bird</td>
+              <td class="film-details__cell">${film.writer}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Actors</td>
-              <td class="film-details__cell">Samuel L. Jackson, Catherine Keener, Sophia Bush</td>
+              <td class="film-details__cell">${film.actors}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Release Date</td>
-              <td class="film-details__cell">${film.year}</td>
+              <td class="film-details__cell">${moment(film.year).format(`DD MMMM YYYY`)}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Runtime</td>
-              <td class="film-details__cell">${film.duration}</td>
+              <td class="film-details__cell">${Math.floor(moment.duration(film.duration).asMinutes())}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Country</td>
-              <td class="film-details__cell">USA</td>
+              <td class="film-details__cell">${film.country}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Genres</td>
@@ -114,7 +115,7 @@ class ElementBuilder {
       </section>
 
       <section class="film-details__comments-wrap">
-        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${film.comments}</span></h3>
+        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${film.commentsCount}</span></h3>
 
         <ul class="film-details__comments-list">
           <li class="film-details__comment">
@@ -159,41 +160,50 @@ class ElementBuilder {
 
         <div class="film-details__user-score">
           <div class="film-details__user-rating-poster">
-            <img src="images/posters/blackmail.jpg" alt="film-poster" class="film-details__user-rating-img">
+            <img src="images/posters/${film.posters}" alt="film-poster" class="film-details__user-rating-img">
           </div>
 
           <section class="film-details__user-rating-inner">
-            <h3 class="film-details__user-rating-title">Incredibles 2</h3>
+            <h3 class="film-details__user-rating-title">${film.title}</h3>
 
             <p class="film-details__user-rating-feelings">How you feel it?</p>
 
             <div class="film-details__user-rating-score">
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="1" id="rating-1">
-              <label class="film-details__user-rating-label" for="rating-1">1</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="2" id="rating-2">
-              <label class="film-details__user-rating-label" for="rating-2">2</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="3" id="rating-3">
-              <label class="film-details__user-rating-label" for="rating-3">3</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="4" id="rating-4">
-              <label class="film-details__user-rating-label" for="rating-4">4</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="5" id="rating-5" checked>
-              <label class="film-details__user-rating-label" for="rating-5">5</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="6" id="rating-6">
-              <label class="film-details__user-rating-label" for="rating-6">6</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="7" id="rating-7">
-              <label class="film-details__user-rating-label" for="rating-7">7</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="8" id="rating-8">
-              <label class="film-details__user-rating-label" for="rating-8">8</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9">
-              <label class="film-details__user-rating-label" for="rating-9">9</label>
+                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"
+                value="1" id="rating-1" ${film.userRating === 1 && `checked`}>
+                <label class="film-details__user-rating-label" for="rating-1">1</label>
+                
+                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"
+                value="2" id="rating-2" ${film.userRating === 2 && `checked`}>
+                <label class="film-details__user-rating-label" for="rating-2">2</label>
+                
+                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"
+                value="3" id="rating-3" ${film.userRating === 3 && `checked`}>
+                <label class="film-details__user-rating-label" for="rating-3">3</label>
+                
+                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"
+                value="4" id="rating-4" ${film.userRating === 4 && `checked`}>
+                <label class="film-details__user-rating-label" for="rating-4">4</label>
+                
+                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"
+                value="5" id="rating-5" ${film.userRating === 5 && `checked`}>
+                <label class="film-details__user-rating-label" for="rating-5">5</label>
+                
+                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"
+                value="6" id="rating-6" ${film.userRating === 6 && `checked`}>
+                <label class="film-details__user-rating-label" for="rating-6">6</label>
+                
+                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"
+                value="7" id="rating-7" ${film.userRating === 7 && `checked`}>
+                <label class="film-details__user-rating-label" for="rating-7">7</label>
+                
+                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"
+                value="8" id="rating-8" ${film.userRating === 8 && `checked`}>
+                <label class="film-details__user-rating-label" for="rating-8">8</label>
+                
+                <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"
+                value="9" id="rating-9" ${film.userRating === 9 && `checked`}>
+                <label class="film-details__user-rating-label" for="rating-9">9</label>
 
             </div>
           </section>

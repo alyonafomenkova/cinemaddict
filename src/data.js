@@ -1,5 +1,5 @@
 
-import {getRandomNumber, getRandomElement, getShuffledSubarray} from './util.js';
+import {getRandomNumber, getRandomElement, getShuffledSubarray, getRandomDate} from './util.js';
 const DESCRIPTION_TEXT = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.`;
 const DescriptionCount = {
   MIN: 1,
@@ -18,6 +18,10 @@ const RatingInterval = {
   MAX: 10,
   STEP: 0.1
 };
+const UserRating = {
+  MIN: 1,
+  MAX: 9
+};
 const generateRating = () => {
   const rating = [];
   for (let i = RatingInterval.MIN; i < RatingInterval.MAX; i = i + RatingInterval.STEP) {
@@ -30,8 +34,18 @@ const YearsInterval = {
   MIN: 1960,
   MAX: 2019
 };
-const duration = [`1.20`, `1.30`, `2.20`, `2.30`, `3.10`];
 const genre = [`comedy`, `drama`, `horror`, `action`, `adventure`, `war`, `musical`, `historical`, `science`];
+const director = [
+  `Errol Morris`, `Steven Soderbergh`, `Steven Spielberg`, `David Fincher`, `Luc Besson`, `Christopher Nolan`,
+  `David Lynch`, `Quentin Tarantino`, `Lynne Ramsay`
+];
+const writer = [`Stephen King`, `Nora Ephron`, `Woody Allen`, `Quentin Tarantino`, `Chuck Palahniuk`, `Charlie Kaufman`, `William Goldman`, `Ernest Lehman`];
+const actors = [
+  `Leonardo DiCaprio`, `Brad Pitt`, `Sophie Marceau`, `Penélope Cruz`, `Keira Knightley`, `Lena Headey`, `Vincent Perez`, `John Travolta`,
+  `Samuel L. Jackson`, `Tim Roth`, `Christoph Waltz`,
+];
+const ACTORS_COUNT = 4;
+const country = [`USA`, `France`, `Germany`, `Italy`, `Spain`];
 const CommentsCount = {
   MIN: 0,
   MAX: 150
@@ -47,10 +61,24 @@ const generateFilm = () => ({
   posters: getRandomElement(posters),
   description: getShuffledSubarray(description, numberOfDescription),
   rating: getRandomElement(ratingArray),
-  year: getRandomNumber(YearsInterval.MIN, YearsInterval.MAX),
-  duration: getRandomElement(duration),
+  userRating: getRandomNumber(UserRating.MIN, UserRating.MAX),
+  director: getRandomElement(director),
+  writer: getRandomElement(writer),
+  actors: getShuffledSubarray(actors, ACTORS_COUNT),
+  country: getRandomElement(country),
+  year: getRandomDate(new Date(1970, 0, 1), new Date()),
+  duration: getRandomNumber(5280000, 11700000),
   genre: getRandomElement(genre),
-  comments: getRandomNumber(CommentsCount.MIN, CommentsCount.MAX)
+  restriction: [2, 6, 12, 16, 18][Math.floor(Math.random() * 5)],
+  commentsCount: getRandomNumber(CommentsCount.MIN, CommentsCount.MAX),
+  comments: [
+    {
+      text: `So long-long story, boring!`,
+      author: `Tim Macoveev`,
+      emoji: `😴`,
+      date: Date.now()
+    }
+  ],
 });
 
 const generateFilms = (count) => {

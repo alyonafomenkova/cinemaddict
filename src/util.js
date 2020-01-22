@@ -36,4 +36,8 @@ const checkExists = (value, message) => {
   return value;
 };
 
-export {getRandomNumber, getRandomElement, getShuffledSubarray, getSubarray, createElement, checkExists};
+const getRandomDate = (start, end) => {
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+};
+
+export {getRandomNumber, getRandomElement, getShuffledSubarray, getSubarray, createElement, checkExists, getRandomDate};
