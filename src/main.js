@@ -77,9 +77,14 @@ const renderFilms = (container, filmsArray, group) => {
 
     const onSmallFilmClick = () => {
       const ratingArea = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
+      const emoji = detailedFilmComponent.querySelector(`.film-details__emoji-list`);
+      const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
       body.appendChild(overlay);
       body.appendChild(detailedFilmComponent);
       ratingArea.addEventListener(`click`, FilmStorage.get().changeRating(detailedFilmComponent));
+      emoji.addEventListener(`click`, FilmStorage.get().changeEmoji(detailedFilmComponent));
+      //commentsArea.addEventListener(`keydown`, FilmStorage.get().addComments(detailedFilmComponent));
+      commentsArea.addEventListener(`keydown`, FilmStorage.get().addComments(film, detailedFilmComponent));
     };
 
     let filmComponent;

@@ -117,18 +117,7 @@ class ElementBuilder {
       <section class="film-details__comments-wrap">
         <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${film.commentsCount}</span></h3>
 
-        <ul class="film-details__comments-list">
-          <li class="film-details__comment">
-            <span class="film-details__comment-emoji">😴</span>
-            <div>
-              <p class="film-details__comment-text">So long-long story, boring!</p>
-              <p class="film-details__comment-info">
-                <span class="film-details__comment-author">Tim Macoveev</span>
-                <span class="film-details__comment-day">3 days ago</span>
-              </p>
-            </div>
-          </li>
-        </ul>
+        <ul class="film-details__comments-list">${this.templateForComments(film)}</ul>
 
         <div class="film-details__new-comment">
           <div>
@@ -211,6 +200,20 @@ class ElementBuilder {
       </section>
     </form>
   </section>`.trim();
+  }
+
+  static templateForComments(film) {
+    return film.comments.map((comment) => `
+      <li class="film-details__comment">
+        <span class="film-details__comment-emoji">${comment.emoji}</span>
+        <div>
+          <p class="film-details__comment-text">${comment.text}</p>
+          <p class="film-details__comment-info">
+            <span class="film-details__comment-author">${comment.author}</span>
+            <span class="film-details__comment-day">${moment(comment.date).startOf(`min`).fromNow()}</span>
+          </p>
+        </div>
+      </li>`).join(``);
   }
 
   static buildSmallFilmElement(film, clickListener) {
