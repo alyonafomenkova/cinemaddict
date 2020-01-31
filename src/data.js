@@ -1,5 +1,6 @@
 
 import {getRandomNumber, getRandomElement, getShuffledSubarray, getRandomDate} from './util.js';
+
 const DESCRIPTION_TEXT = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.`;
 const DescriptionCount = {
   MIN: 1,
@@ -30,10 +31,6 @@ const generateRating = () => {
   return rating;
 };
 const ratingArray = generateRating();
-const YearsInterval = {
-  MIN: 1960,
-  MAX: 2019
-};
 const genre = [`comedy`, `drama`, `horror`, `action`, `adventure`, `war`, `musical`, `historical`, `science`];
 const director = [
   `Errol Morris`, `Steven Soderbergh`, `Steven Spielberg`, `David Fincher`, `Luc Besson`, `Christopher Nolan`,
@@ -56,7 +53,9 @@ const CountOfFilms = {
   MIN: 0,
   MAX: 14
 };
-const generateFilm = () => ({
+let filmId = 0;
+const generateFilmsData = () => ({
+  id: filmId++,
   title: getRandomElement(title),
   posters: getRandomElement(posters),
   description: getShuffledSubarray(description, numberOfDescription),
@@ -84,12 +83,10 @@ const generateFilm = () => ({
 const generateFilms = (count) => {
   const films = [];
   for (let i = 0; i < count; i++) {
-    const film = generateFilm();
+    const film = generateFilmsData();
     films.push(film);
   }
   return films;
 };
 
-const generatedFilms = generateFilms(CountOfFilms.COMMON);
-
-export {CountOfFilms, generatedFilms};
+export {CountOfFilms, generateFilms};

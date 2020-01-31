@@ -1,4 +1,4 @@
-import {CountOfFilms} from './data.js';
+import {CountOfFilms, generateFilms} from './data.js';
 import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
 import makeFilter from './make-filter.js';
 import {FilmStorage} from './film-storage.js';
@@ -23,8 +23,10 @@ const FILTERS = [
     count: 8
   }
 ];
+const FILMS_PER_LOAD = 5;
 const filtersContainer = document.querySelector(`.main-navigation`);
 const filmsContainers = document.querySelectorAll(`.films-list__container`);
+const showMoreBtn = document.querySelector(`.films-list__show-more`);
 const commonFilmsContainer = filmsContainers[0];
 const topRatedFilmsContainer = filmsContainers[1];
 const mostCommentedFilmsContainer = filmsContainers[2];
@@ -33,7 +35,6 @@ const Group = {
   TOP_RATED: 1,
   MOST_COMMENTED: 2
 };
-const films = new FilmStorage();
 
 const renderFilters = (filters) => {
   filters.reverse().forEach((item) => {
@@ -41,27 +42,27 @@ const renderFilters = (filters) => {
   });
 };
 
-const updateFilms = () => {
-  const filtersList = filtersContainer.querySelectorAll(`.main-navigation__item`);
-  const onFiltersClick = (evt) => {
-    evt.preventDefault();
-    const target = evt.target;
-    const count = getRandomNumber(CountOfFilms.MIN, CountOfFilms.MAX);
-    const newArray = getSubarray(films._films, count);
-
-    commonFilmsContainer.innerHTML = ``;
-    renderFilms(commonFilmsContainer, newArray, Group.ALL);
-
-    filtersList.forEach((item) => {
-      item.classList.remove(`main-navigation__item--active`);
-    });
-    target.classList.add(`main-navigation__item--active`);
-  };
-
-  filtersList.forEach((item) => {
-    item.addEventListener(`click`, onFiltersClick);
-  });
-};
+// const initFilmCardFilters = () => {
+//   const filtersList = filtersContainer.querySelectorAll(`.main-navigation__item`);
+//   const onFiltersClick = (evt) => {
+//     evt.preventDefault();
+//     const target = evt.target;
+//     const count = getRandomNumber(CountOfFilms.MIN, CountOfFilms.MAX);
+//     const newArray = getSubarray(films._films, count);
+//
+//     commonFilmsContainer.innerHTML = ``;
+//     renderFilms(commonFilmsContainer, newArray, Group.ALL);
+//
+//     filtersList.forEach((item) => {
+//       item.classList.remove(`main-navigation__item--active`);
+//     });
+//     target.classList.add(`main-navigation__item--active`);
+//   };
+//
+//   filtersList.forEach((item) => {
+//     item.addEventListener(`click`, onFiltersClick);
+//   });
+// };
 
 const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
@@ -75,8 +76,10 @@ const renderFilms = (container, filmsArray, group) => {
     };
 
     const onSmallFilmClick = () => {
+      const ratingArea = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
       body.appendChild(overlay);
       body.appendChild(detailedFilmComponent);
+      ratingArea.addEventListener(`click`, FilmStorage.get().changeRating(detailedFilmComponent));
     };
 
     let filmComponent;
@@ -113,6 +116,14 @@ const onSuccess = (filmsArray) => {
   renderFilms(mostCommentedFilmsContainer, mostCommentedFilms, Group.MOST_COMMENTED);
 };
 
+const loadMoreFilms = () => {
+  const films = generateFilms(FILMS_PER_LOAD);
+  FilmStorage.get().addFilms(films);
+  renderFilms(commonFilmsContainer, films, Group.ALL);
+};
+
 renderFilters(FILTERS);
-films.load(onError, onSuccess);
-updateFilms();
+// initFilmCardFilters();
+
+loadMoreFilms();
+showMoreBtn.addEventListener(`click`, loadMoreFilms);
