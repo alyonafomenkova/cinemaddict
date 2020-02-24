@@ -2,4 +2,8 @@ const KeyCode = {
   ENTER: 13
 };
 
-export {KeyCode};
+const FilmStorageEventType = {
+  COMMENT_ADDED: `comment_added`
+};
+
+export {KeyCode, FilmStorageEventType};

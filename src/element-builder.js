@@ -14,11 +14,11 @@ class ElementBuilder {
       </p>
       <img src="./images/posters/${film.posters}" alt="" class="film-card__poster">
       <p class="film-card__description">${film.description}</p>
-      <button class="film-card__comments">${film.commentsCount} comments</button>
+      <button class="film-card__comments">${film.comments.length} comments</button>
       <form class="film-card__controls">
-        <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist">Add to watchlist</button>
-        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched">Mark as watched</button>
-        <button class="film-card__controls-item button film-card__controls-item--favorite">Mark as favorite</button>
+        <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${film.isOnWatchlist && `film-card__controls-item--active`}">Add to watchlist</button>
+        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched ${film.isWatched && `film-card__controls-item--active`}">Mark as watched</button>
+        <button class="film-card__controls-item button film-card__controls-item--favorite ${film.isFavorite && `film-card__controls-item--active`}">Mark as favorite</button>
       </form>
    </article>`.trim();
   }
@@ -35,7 +35,7 @@ class ElementBuilder {
       </p>
       <img src="./images/posters/${film.posters}" alt="" class="film-card__poster">
       <p class="film-card__description">${film.description}</p>
-      <button class="film-card__comments">${film.commentsCount} comments</button>
+      <button class="film-card__comments">${film.comments.length} comments</button>
    </article>`.trim();
   }
 
@@ -104,18 +104,18 @@ class ElementBuilder {
       </div>
 
       <section class="film-details__controls">
-        <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist">
+        <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${film.isOnWatchlist && `checked`}>
         <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
-        <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" checked>
+        <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" ${film.isWatched && `checked`}>
         <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
-        <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite">
+        <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite" ${film.isFavorite && `checked`}>
         <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
       </section>
 
       <section class="film-details__comments-wrap">
-        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${film.commentsCount}</span></h3>
+        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${film.comments.count}</span></h3>
 
         <ul class="film-details__comments-list">${this.templateForComments(film)}</ul>
 

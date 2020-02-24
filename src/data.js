@@ -69,7 +69,6 @@ const generateFilmsData = () => ({
   duration: getRandomNumber(5280000, 11700000),
   genre: getRandomElement(genre),
   restriction: [2, 6, 12, 16, 18][Math.floor(Math.random() * 5)],
-  commentsCount: getRandomNumber(CommentsCount.MIN, CommentsCount.MAX),
   comments: [
     {
       text: `So long-long story, boring!`,
@@ -78,6 +77,9 @@ const generateFilmsData = () => ({
       date: Date.now()
     }
   ],
+  isOnWatchlist: false,
+  isWatched: false,
+  isFavorite: false
 });
 
 const generateFilms = (count) => {

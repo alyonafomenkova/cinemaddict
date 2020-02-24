@@ -3,6 +3,8 @@ import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
 import makeFilter from './make-filter.js';
 import {FilmStorage} from './film-storage.js';
 import {ElementBuilder} from './element-builder.js';
+import {KeyCode, FilmStorageEventType} from "./constants";
+import moment from "moment";
 
 const FILTERS = [
   {
@@ -67,26 +69,50 @@ const renderFilters = (filters) => {
 const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
 
-  filmsArray.forEach((film) => {
+  filmsArray.map((film) => { return film.id; }).forEach((filmId) => {
     const overlay = ElementBuilder.createOverlay();
+    let commentAddListener = null;
 
     const onDetailedFilmClick = () => {
+      const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
       body.removeChild(detailedFilmComponent);
       body.removeChild(overlay);
+      commentsArea.removeEventListener(`keydown`, commentAddListener);
     };
 
     const onSmallFilmClick = () => {
       const ratingArea = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
       const emoji = detailedFilmComponent.querySelector(`.film-details__emoji-list`);
       const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
+      const watchlistInput = detailedFilmComponent.querySelector(`#watchlist`);
+      const watchedInput = detailedFilmComponent.querySelector(`#watched`);
+      const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
+      const film = FilmStorage.get().getFilm(filmId);
+
       body.appendChild(overlay);
       body.appendChild(detailedFilmComponent);
+      setDetailedCardCommentsCount(film.comments.length);
+
+      commentAddListener = function () {
+        const text = document.querySelector(`.film-details__comment-input`).value;
+
+        if (event.ctrlKey && event.keyCode === KeyCode.ENTER && text) {
+          const storage = FilmStorage.get();
+          storage.addComment(filmId, text);
+          const comments = storage.getFilm(filmId).comments;
+          setDetailedCardCommentsCount(comments.length);
+        }
+      };
+
       ratingArea.addEventListener(`click`, FilmStorage.get().changeRating(detailedFilmComponent));
       emoji.addEventListener(`click`, FilmStorage.get().changeEmoji(detailedFilmComponent));
-      //commentsArea.addEventListener(`keydown`, FilmStorage.get().addComments(detailedFilmComponent));
-      commentsArea.addEventListener(`keydown`, FilmStorage.get().addComments(film, detailedFilmComponent));
+      commentsArea.addEventListener(`keydown`, commentAddListener);
+      //watchlistInput.addEventListener(`click`, FilmStorage.get().watchlistChange(film));
+      //watchedInput.addEventListener(`click`, FilmStorage.get().watchedChange(film));
+      //favoriteInput.addEventListener(`click`, FilmStorage.get().favoriteChange(film));
     };
 
+    const film = FilmStorage.get().getFilm(filmId);
     let filmComponent;
 
     switch (group) {
@@ -105,6 +131,23 @@ const renderFilms = (container, filmsArray, group) => {
 
     const detailedFilmComponent = ElementBuilder.buildDetailedFilmElement(film, onDetailedFilmClick);
     container.appendChild(filmComponent);
+
+    FilmStorage.get().addListener((evt) => {
+      if (evt.type === FilmStorageEventType.COMMENT_ADDED && evt.filmId === filmId) {
+        const count = FilmStorage.get().getFilm(filmId).comments.length;
+        setSmallCardCommentsCount(filmComponent, count);
+      }
+    }); // добавить новые типы, вынести в отдельную функцию odserveFilmStorageDetailedFilm
+
+    // ///////////////////////////////////
+    const watchlistBtn = filmComponent.querySelector(`.film-card__controls-item--add-to-watchlist`);
+    const watchedBtn = filmComponent.querySelector(`.film-card__controls-item--mark-as-watched`);
+    const favoriteBtn = filmComponent.querySelector(`.film-card__controls-item--favorite`);
+
+    //watchlistBtn.addEventListener(`click`, FilmStorage.get().watchlistChange(film));
+    //watchedBtn.addEventListener(`click`, FilmStorage.get().watchedChange(film));
+    //favoriteBtn.addEventListener(`click`, FilmStorage.get().favoriteChange(film));
+    // ///////////////////////////////////
   });
 };
 
@@ -116,9 +159,9 @@ const onSuccess = (filmsArray) => {
   const topRatedFilms = getShuffledSubarray(filmsArray, CountOfFilms.EXTRA);
   const mostCommentedFilms = getShuffledSubarray(filmsArray, CountOfFilms.EXTRA);
 
-  renderFilms(commonFilmsContainer, filmsArray, Group.ALL);
-  renderFilms(topRatedFilmsContainer, topRatedFilms, Group.TOP_RATED);
-  renderFilms(mostCommentedFilmsContainer, mostCommentedFilms, Group.MOST_COMMENTED);
+  // renderFilms(commonFilmsContainer, filmsArray, Group.ALL);
+  // renderFilms(topRatedFilmsContainer, topRatedFilms, Group.TOP_RATED);
+  // renderFilms(mostCommentedFilmsContainer, mostCommentedFilms, Group.MOST_COMMENTED);
 };
 
 const loadMoreFilms = () => {
@@ -132,3 +175,13 @@ renderFilters(FILTERS);
 
 loadMoreFilms();
 showMoreBtn.addEventListener(`click`, loadMoreFilms);
+
+function setDetailedCardCommentsCount(count) {
+  const commentsCountField = document.querySelector(`.film-details__comments-count`);
+  commentsCountField.innerHTML = count;
+}
+
+function setSmallCardCommentsCount(filmComponent, count) {
+  const commentsCountField = filmComponent.querySelector(`.film-card__comments`);
+  commentsCountField.innerHTML = count + ` comments`;
+}
