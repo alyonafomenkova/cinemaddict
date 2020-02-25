@@ -54,19 +54,19 @@ class FilmStorage {
     console.log(`Add more ${films.length} films. Total: ${this.filmsMap.size} films.`);
   }
 
-  changeRating(film) {
-    return function () {
-      const userRating = film.querySelector(`.film-details__user-rating-input:checked`).value;
-      film.querySelector(`.film-details__user-rating span`).innerHTML = userRating;
-    };
-  }
-
-  changeEmoji(film) {
-    return function () {
-      const emoji = film.querySelector(`.film-details__emoji-item:checked + label`).textContent;
-      film.querySelector(`.film-details__add-emoji-label`).innerHTML = emoji;
-    };
-  }
+  // changeRating(film) {
+  //   return function () {
+  //     const userRating = film.querySelector(`.film-details__user-rating-input:checked`).value;
+  //     film.querySelector(`.film-details__user-rating span`).innerHTML = userRating;
+  //   };
+  // }
+  //
+  // changeEmoji(film) {
+  //   return function () {
+  //     const emoji = film.querySelector(`.film-details__emoji-item:checked + label`).textContent;
+  //     film.querySelector(`.film-details__add-emoji-label`).innerHTML = emoji;
+  //   };
+  // }
 
   // static updateSmallFilm(film) {
   //   console.log(`updateSmallFilm: `, film);

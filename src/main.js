@@ -3,7 +3,9 @@ import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
 import makeFilter from './make-filter.js';
 import {FilmStorage} from './film-storage.js';
 import {ElementBuilder} from './element-builder.js';
-import {KeyCode, FilmStorageEventType} from "./constants";
+import {KeyCode, FilmStorageEventType} from './constants';
+import {setSmallCardCommentsCount} from './small-film';
+import {setDetailedCardCommentsCount, changeEmoji, addComment} from './detailed-film';
 import moment from "moment";
 
 const FILTERS = [
@@ -69,9 +71,10 @@ const renderFilters = (filters) => {
 const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
 
-  filmsArray.map((film) => { return film.id; }).forEach((filmId) => {
+  filmsArray.map((film) => (film.id)).forEach((filmId) => {
     const overlay = ElementBuilder.createOverlay();
     let commentAddListener = null;
+    let changeEmojiListener = null;
 
     const onDetailedFilmClick = () => {
       const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
@@ -81,32 +84,27 @@ const renderFilms = (container, filmsArray, group) => {
     };
 
     const onSmallFilmClick = () => {
-      const ratingArea = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
+      const film = FilmStorage.get().getFilm(filmId);
       const emoji = detailedFilmComponent.querySelector(`.film-details__emoji-list`);
       const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
-      const watchlistInput = detailedFilmComponent.querySelector(`#watchlist`);
-      const watchedInput = detailedFilmComponent.querySelector(`#watched`);
-      const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
-      const film = FilmStorage.get().getFilm(filmId);
+
+      // const ratingArea = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
+      // const watchlistInput = detailedFilmComponent.querySelector(`#watchlist`);
+      // const watchedInput = detailedFilmComponent.querySelector(`#watched`);
+      // const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
+
 
       body.appendChild(overlay);
       body.appendChild(detailedFilmComponent);
       setDetailedCardCommentsCount(film.comments.length);
-
-      commentAddListener = function () {
-        const text = document.querySelector(`.film-details__comment-input`).value;
-
-        if (event.ctrlKey && event.keyCode === KeyCode.ENTER && text) {
-          const storage = FilmStorage.get();
-          storage.addComment(filmId, text);
-          const comments = storage.getFilm(filmId).comments;
-          setDetailedCardCommentsCount(comments.length);
-        }
-      };
-
-      ratingArea.addEventListener(`click`, FilmStorage.get().changeRating(detailedFilmComponent));
-      emoji.addEventListener(`click`, FilmStorage.get().changeEmoji(detailedFilmComponent));
+      changeEmojiListener = changeEmoji(detailedFilmComponent);
+      commentAddListener = addComment(film);
+      emoji.addEventListener(`click`, changeEmojiListener);
       commentsArea.addEventListener(`keydown`, commentAddListener);
+
+
+      //ratingArea.addEventListener(`click`, FilmStorage.get().changeRating(detailedFilmComponent));
+      //emoji.addEventListener(`click`, FilmStorage.get().changeEmoji(detailedFilmComponent));
       //watchlistInput.addEventListener(`click`, FilmStorage.get().watchlistChange(film));
       //watchedInput.addEventListener(`click`, FilmStorage.get().watchedChange(film));
       //favoriteInput.addEventListener(`click`, FilmStorage.get().favoriteChange(film));
@@ -175,13 +173,3 @@ renderFilters(FILTERS);
 
 loadMoreFilms();
 showMoreBtn.addEventListener(`click`, loadMoreFilms);
-
-function setDetailedCardCommentsCount(count) {
-  const commentsCountField = document.querySelector(`.film-details__comments-count`);
-  commentsCountField.innerHTML = count;
-}
-
-function setSmallCardCommentsCount(filmComponent, count) {
-  const commentsCountField = filmComponent.querySelector(`.film-card__comments`);
-  commentsCountField.innerHTML = count + ` comments`;
-}
