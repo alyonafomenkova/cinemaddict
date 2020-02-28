@@ -37,4 +37,19 @@ function changeEmoji(detailedFilmComponent) {
   };
 }
 
-export {setDetailedCardCommentsCount, addComment, changeEmoji};
+function changeRating(detailedFilmComponent) {
+  return function () {
+    const userRating = detailedFilmComponent.querySelector(`.film-details__user-rating-input:checked`).value;
+    detailedFilmComponent.querySelector(`.film-details__user-rating span`).innerHTML = userRating;
+  };
+}
+
+function changeWatchlist(film) {
+  return function () {
+    console.log("DETAILED_FILM changeWatchlist");
+    const storage = FilmStorage.get();
+    storage.changeWatchlist(film.id, !film.isOnWatchlist);
+  };
+}
+
+export {setDetailedCardCommentsCount, addComment, changeEmoji, changeRating, changeWatchlist};

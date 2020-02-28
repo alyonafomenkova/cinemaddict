@@ -3,4 +3,13 @@ const setSmallCardCommentsCount = (filmComponent, count) => {
   commentsCountField.innerHTML = count + ` comments`;
 };
 
-export {setSmallCardCommentsCount};
+const updateWatchlist = (filmComponent, status) => {
+  const watchlistBtn = filmComponent.querySelector(`.film-card__controls-item--add-to-watchlist`);
+  if (status) {
+    watchlistBtn.classList.add(`film-card__controls-item--active`);
+  } else {
+    watchlistBtn.classList.remove(`film-card__controls-item--active`);
+  }
+};
+
+export {setSmallCardCommentsCount, updateWatchlist};

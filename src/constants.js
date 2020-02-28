@@ -3,7 +3,8 @@ const KeyCode = {
 };
 
 const FilmStorageEventType = {
-  COMMENT_ADDED: `comment_added`
+  COMMENT_ADDED: `comment_added`,
+  WATCHLIST_CHANGED: `watchlist_changed`
 };
 
 export {KeyCode, FilmStorageEventType};
