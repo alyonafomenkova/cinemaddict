@@ -1,14 +1,9 @@
-import {KeyCode, FilmStorageEventType} from "./constants";
-import moment from "moment";
-import {ElementBuilder} from "./element-builder";
+import {FilmStorageEventType} from "./constants";
 
-// /////////////////////////////////////////////////////////////
-// ////////////  НИКАКОГО UI ЗДЕСЬ НЕ ДОЛЖНО БЫТЬ //////////////
-// /////////////////////////////////////////////////////////////
 class FilmStorage {
 
   constructor() {
-    this.filmsMap = new Map();
+    this._filmsMap = new Map();
     this._listeners = [];
     this.addListener = this.addListener.bind(this);
   }
@@ -22,7 +17,7 @@ class FilmStorage {
   }
 
   getFilm(filmId) {
-    let film = this.filmsMap.get(filmId);
+    let film = this._filmsMap.get(filmId);
 
     if (film) {
       return film;
@@ -36,30 +31,31 @@ class FilmStorage {
     console.log(`[STORAGE] Total ${this._listeners.length} listeners`);
   }
 
+  addFilms(films) {
+    films.forEach((film) => {
+      this._filmsMap.set(film.id, film);
+    });
+    console.log(`Add more ${films.length} films. Total: ${this._filmsMap.size} films.`);
+    console.log(`Films in map: `, this._filmsMap);
+  }
+
   notifyFilmCommentAdded(filmId, comment) {
     this._listeners.forEach((listener) => {
       const evt = {
         type: FilmStorageEventType.COMMENT_ADDED,
-        filmId: filmId,
-        comment: comment
+        filmId,
+        comment
       };
       listener(evt);
     });
   }
 
-  addFilms(films) {
-    films.forEach((film) => {
-      this.filmsMap.set(film.id, film);
-    });
-    console.log(`Add more ${films.length} films. Total: ${this.filmsMap.size} films.`);
-  }
-
   addComment(filmId, comment) {
-    let film = this.filmsMap.get(filmId);
+    let film = this._filmsMap.get(filmId);
 
     if (film) {
       film.comments.push(comment);
-      this.filmsMap.set(filmId, film);
+      this._filmsMap.set(filmId, film);
       this.notifyFilmCommentAdded(filmId, comment);
       console.log(`Comment has been updated for film with ID = ${filmId}`);
     } else {
@@ -67,26 +63,23 @@ class FilmStorage {
     }
   }
 
-
-  //
   notifyWatchlistChange(filmId, isOnWatchlist) {
     this._listeners.forEach((listener) => {
       const evt = {
         type: FilmStorageEventType.WATCHLIST_CHANGED,
-        filmId: filmId,
-        isOnWatchlist: isOnWatchlist
+        filmId,
+        isOnWatchlist
       };
       listener(evt);
     });
   }
 
   changeWatchlist(filmId, isOnWatchlist) {
-    let film = this.filmsMap.get(filmId);
+    let film = this._filmsMap.get(filmId);
 
     if (film) {
       film.isOnWatchlist = !film.isOnWatchlist;
-      this.filmsMap.set(filmId, film);
-      console.log("что в storage после клика: ", film.isOnWatchlist);
+      this._filmsMap.set(filmId, film);
       this.notifyWatchlistChange(filmId, isOnWatchlist);
       console.log(`film with ID = ${filmId}`);
     } else {
@@ -94,26 +87,53 @@ class FilmStorage {
     }
   }
 
-  // watchlistChange(film) {
-  //   return function () {
-  //     console.log(`watchlistChange: `, film);
-  //     film.isOnWatchlist = !film.isOnWatchlist;
-  //   };
-  // }
-  //
-  // watchedChange(film) {
-  //   return function () {
-  //     console.log(`watchedChange: `, film);
-  //     film.isWatched = !film.isWatched;
-  //   };
-  // }
-  //
-  // favoriteChange(film) {
-  //   return function () {
-  //     console.log(`favoriteChange: `, film);
-  //     film.isFavorite = !film.isFavorite;
-  //   };
-  // }
+  notifyWatchedChange(filmId, isWatched) {
+    this._listeners.forEach((listener) => {
+      const evt = {
+        type: FilmStorageEventType.WATCHED_CHANGED,
+        filmId,
+        isWatched
+      };
+      listener(evt);
+    });
+  }
+
+  changeWatched(filmId, isWatched) {
+    let film = this._filmsMap.get(filmId);
+
+    if (film) {
+      film.isWatched = !film.isWatched;
+      this._filmsMap.set(filmId, film);
+      this.notifyWatchedChange(filmId, isWatched);
+      console.log(`film with ID = ${filmId}`);
+    } else {
+      throw new Error(`Film with ID ${filmId} not found`);
+    }
+  }
+
+  notifyFavoriteChange(filmId, isFavorite) {
+    this._listeners.forEach((listener) => {
+      const evt = {
+        type: FilmStorageEventType.FAVORITE_CHANGED,
+        filmId,
+        isFavorite
+      };
+      listener(evt);
+    });
+  }
+
+  changeFavorite(filmId, isFavorite) {
+    let film = this._filmsMap.get(filmId);
+
+    if (film) {
+      film.isFavorite = !film.isFavorite;
+      this._filmsMap.set(filmId, film);
+      this.notifyFavoriteChange(filmId, isFavorite);
+      console.log(`film with ID = ${filmId}`);
+    } else {
+      throw new Error(`Film with ID ${filmId} not found`);
+    }
+  }
 }
 
 export {FilmStorage};

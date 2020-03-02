@@ -46,10 +46,26 @@ function changeRating(detailedFilmComponent) {
 
 function changeWatchlist(film) {
   return function () {
-    console.log("DETAILED_FILM changeWatchlist");
+    console.log("[DETAILED_FILM] changeWatchlist");
     const storage = FilmStorage.get();
     storage.changeWatchlist(film.id, !film.isOnWatchlist);
   };
 }
 
-export {setDetailedCardCommentsCount, addComment, changeEmoji, changeRating, changeWatchlist};
+function changeWatched(film) {
+  return function () {
+    console.log("[DETAILED_FILM] changeWatched");
+    const storage = FilmStorage.get();
+    storage.changeWatched(film.id, !film.isWatched);
+  };
+}
+
+function changeFavorite(film) {
+  return function () {
+    console.log("[DETAILED_FILM] changeFavorite");
+    const storage = FilmStorage.get();
+    storage.changeFavorite(film.id, !film.isFavorite);
+  };
+}
+
+export {setDetailedCardCommentsCount, addComment, changeEmoji, changeRating, changeWatchlist, changeWatched, changeFavorite};
