@@ -1,4 +1,4 @@
-import {KeyCode} from "./constants";
+import {FilmStorageEventType, KeyCode} from "./constants";
 import {FilmStorage} from "./film-storage";
 import {ElementBuilder} from './element-builder.js';
 import moment from 'moment';
@@ -6,6 +6,10 @@ import moment from 'moment';
 const setDetailedCardCommentsCount = (count) => {
   const commentsCountField = document.querySelector(`.film-details__comments-count`);
   commentsCountField.innerHTML = count;
+};
+
+const updateInputControl = (status, input) => {
+  status ? input.checked = true : input.checked = false;
 };
 
 function addComment(film) {
@@ -46,7 +50,6 @@ function changeRating(detailedFilmComponent) {
 
 function changeWatchlist(film) {
   return function () {
-    console.log("[DETAILED_FILM] changeWatchlist");
     const storage = FilmStorage.get();
     storage.changeWatchlist(film.id, !film.isOnWatchlist);
   };
@@ -54,7 +57,6 @@ function changeWatchlist(film) {
 
 function changeWatched(film) {
   return function () {
-    console.log("[DETAILED_FILM] changeWatched");
     const storage = FilmStorage.get();
     storage.changeWatched(film.id, !film.isWatched);
   };
@@ -62,10 +64,29 @@ function changeWatched(film) {
 
 function changeFavorite(film) {
   return function () {
-    console.log("[DETAILED_FILM] changeFavorite");
     const storage = FilmStorage.get();
     storage.changeFavorite(film.id, !film.isFavorite);
   };
 }
 
-export {setDetailedCardCommentsCount, addComment, changeEmoji, changeRating, changeWatchlist, changeWatched, changeFavorite};
+const observeFilmStorageSmallFilm = (evt, film, detailedFilmComponent) => {
+  if (evt.type === FilmStorageEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
+    const status = FilmStorage.get().getFilm(film.id).isOnWatchlist;
+    const watchlistInput = detailedFilmComponent.querySelector(`#watchlist`);
+    updateInputControl(status, watchlistInput);
+  }
+
+  if (evt.type === FilmStorageEventType.WATCHED_CHANGED && evt.filmId === film.id) {
+    const status = FilmStorage.get().getFilm(film.id).isWatched;
+    const watchedInput = detailedFilmComponent.querySelector(`#watched`);
+    updateInputControl(status, watchedInput);
+  }
+
+  if (evt.type === FilmStorageEventType.FAVORITE_CHANGED && evt.filmId === film.id) {
+    const status = FilmStorage.get().getFilm(film.id).isFavorite;
+    const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
+    updateInputControl(status, favoriteInput);
+  }
+};
+
+export {setDetailedCardCommentsCount, addComment, changeEmoji, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm};

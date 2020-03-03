@@ -1,15 +1,38 @@
 import {FilmStorageEventType} from "./constants";
 import {FilmStorage} from "./film-storage";
+import {checkExists} from "./util";
 
 const setSmallCardCommentsCount = (filmComponent, count) => {
   const commentsCountField = filmComponent.querySelector(`.film-card__comments`);
   commentsCountField.innerHTML = count + ` comments`;
 };
 
+function changeWatchlistOnSmallFilm(film) {
+  return function () {
+    event.preventDefault();
+    const storage = FilmStorage.get();
+    storage.changeWatchlist(film.id, !film.isOnWatchlist);
+  };
+}
+
+function changeWatchedOnSmallFilm(film) {
+  return function () {
+    event.preventDefault();
+    const storage = FilmStorage.get();
+    storage.changeWatched(film.id, !film.isWatched);
+  };
+}
+
+function changeFavoriteOnSmallFilm(film) {
+  return function () {
+    event.preventDefault();
+    const storage = FilmStorage.get();
+    storage.changeFavorite(film.id, !film.isFavorite);
+  };
+}
+
 const updateBtnStatus = (status, btn) => {
   if (status) {
-    console.log("status: ", status);
-    console.log("btn: ", btn);
     btn.classList.add(`film-card__controls-item--active`);
   } else {
     btn.classList.remove(`film-card__controls-item--active`);
@@ -41,4 +64,11 @@ const observeFilmStorageDetailedFilm = (evt, film, filmComponent) => {
   }
 };
 
-export {setSmallCardCommentsCount, observeFilmStorageDetailedFilm};
+function setListenersOnBtnControls(element, clickableAreaName, clickListener) {
+  const clickableArea = element.querySelector(clickableAreaName);
+  element.clickableArea = checkExists(clickableArea, `Clickable area '${clickableAreaName}' not found`);
+  element.clickableArea.addEventListener(`click`, clickListener);
+  element.areaClickListener = clickListener;
+}
+
+export {setSmallCardCommentsCount, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm, observeFilmStorageDetailedFilm};
