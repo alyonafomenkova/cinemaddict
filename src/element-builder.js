@@ -216,6 +216,14 @@ class ElementBuilder {
       </li>`).join(``);
   }
 
+  static templateForFilters(id, name, count, isChecked = false) {
+    return `
+      <a id=${id} href="#${name.toLowerCase().split(` `).slice(0, 1)}" class="main-navigation__item ${isChecked ? ` main-navigation__item--active` : ``}">
+        ${name}
+        ${count ? `<span class="main-navigation__item-count">${count}</span>` : ``}
+      </a>`.trim();
+  }
+
   static buildSmallFilmElement(film, clickListener) {
     const template = this.templateForSmallFilm(film);
     const element = createElement(template);

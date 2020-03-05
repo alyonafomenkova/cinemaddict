@@ -1,6 +1,6 @@
 import {CountOfFilms, generateFilms} from './data.js';
 import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
-import makeFilter from './make-filter.js';
+import {FILTERS, filtersList, renderFilters, changeClassForActiveFilter, filterFilms} from './filter.js';
 import {FilmStorage} from './film-storage.js';
 import {ElementBuilder} from './element-builder.js';
 import {KeyCode, FilmStorageEventType} from './constants';
@@ -8,27 +8,7 @@ import {observeFilmStorageDetailedFilm, changeWatchlistOnSmallFilm, changeWatche
 import {setDetailedCardCommentsCount, changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm} from './detailed-film';
 import moment from "moment";
 
-const FILTERS = [
-  {
-    name: `All movies`,
-    count: null,
-    isChecked: true
-  },
-  {
-    name: `Watchlist`,
-    count: 13
-  },
-  {
-    name: `History`,
-    count: 4
-  },
-  {
-    name: `Favorites`,
-    count: 8
-  }
-];
 const FILMS_PER_LOAD = 5;
-const filtersContainer = document.querySelector(`.main-navigation`);
 const filmsContainers = document.querySelectorAll(`.films-list__container`);
 const showMoreBtn = document.querySelector(`.films-list__show-more`);
 const commonFilmsContainer = filmsContainers[0];
@@ -38,12 +18,6 @@ const Group = {
   ALL: 0,
   TOP_RATED: 1,
   MOST_COMMENTED: 2
-};
-
-const renderFilters = (filters) => {
-  filters.reverse().forEach((item) => {
-    filtersContainer.insertAdjacentHTML(`afterbegin`, makeFilter(item.name, item.count, item.isChecked));
-  });
 };
 
 // const initFilmCardFilters = () => {
@@ -156,6 +130,26 @@ const renderFilms = (container, filmsArray, group) => {
   });
 };
 
+const initFilters = () => {
+  const films = FilmStorage.get().getFilms();
+  console.log("films: ", films);
+  const onFiltersClick = (evt) => {
+    evt.preventDefault();
+    const target = evt.target;
+    changeClassForActiveFilter(target);
+
+    const filteredFilms = filterFilms(films, target.id);
+    console.log("filteredFilms: ", filteredFilms);
+
+    commonFilmsContainer.innerHTML = ``;
+    renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
+  };
+
+  filtersList.forEach((item) => {
+    item.addEventListener(`click`, onFiltersClick);
+  });
+};
+
 const onError = () => {
   throw new Error(`ERROR LOADING`);
 };
@@ -175,8 +169,12 @@ const loadMoreFilms = () => {
   renderFilms(commonFilmsContainer, films, Group.ALL);
 };
 
-renderFilters(FILTERS);
-// initFilmCardFilters();
-
 loadMoreFilms();
 showMoreBtn.addEventListener(`click`, loadMoreFilms);
+
+//////////////////////////////////////////////////////////////////////
+
+renderFilters(FILTERS);
+// initFilmCardFilters();
+initFilters();
+

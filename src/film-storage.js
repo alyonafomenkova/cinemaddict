@@ -26,6 +26,11 @@ class FilmStorage {
     }
   }
 
+  getFilms() {
+    const filmsArray = Array.from(this._filmsMap.values());
+    return filmsArray;
+  }
+
   addListener(listener) {
     this._listeners.push(listener);
     console.log(`[STORAGE] Total ${this._listeners.length} listeners`);
