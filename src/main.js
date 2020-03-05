@@ -20,28 +20,6 @@ const Group = {
   MOST_COMMENTED: 2
 };
 
-// const initFilmCardFilters = () => {
-//   const filtersList = filtersContainer.querySelectorAll(`.main-navigation__item`);
-//   const onFiltersClick = (evt) => {
-//     evt.preventDefault();
-//     const target = evt.target;
-//     const count = getRandomNumber(CountOfFilms.MIN, CountOfFilms.MAX);
-//     const newArray = getSubarray(films._films, count);
-//
-//     commonFilmsContainer.innerHTML = ``;
-//     renderFilms(commonFilmsContainer, newArray, Group.ALL);
-//
-//     filtersList.forEach((item) => {
-//       item.classList.remove(`main-navigation__item--active`);
-//     });
-//     target.classList.add(`main-navigation__item--active`);
-//   };
-//
-//   filtersList.forEach((item) => {
-//     item.addEventListener(`click`, onFiltersClick);
-//   });
-// };
-
 const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
 
@@ -56,13 +34,13 @@ const renderFilms = (container, filmsArray, group) => {
 
     const onDetailedFilmClick = () => {
       const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
-      const watchlistInput = detailedFilmComponent.querySelector(`#watchlist`);
+      const watchListInput = detailedFilmComponent.querySelector(`#addwatchlist`);
       const watchedInput = detailedFilmComponent.querySelector(`#watched`);
       const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
       body.removeChild(detailedFilmComponent);
       body.removeChild(overlay);
       commentsArea.removeEventListener(`keydown`, commentAddListener);
-      watchlistInput.removeEventListener(`click`, changeWatchlistListener);
+      watchListInput.removeEventListener(`click`, changeWatchlistListener);
       watchedInput.removeEventListener(`click`, changeWatchedListener);
       favoriteInput.removeEventListener(`click`, changeFavoriteListener);
     };
@@ -72,7 +50,7 @@ const renderFilms = (container, filmsArray, group) => {
       const emoji = detailedFilmComponent.querySelector(`.film-details__emoji-list`);
       const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
       const ratingArea = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
-      const watchlistInput = detailedFilmComponent.querySelector(`#watchlist`);
+      const watchListInput = detailedFilmComponent.querySelector(`#addwatchlist`);
       const watchedInput = detailedFilmComponent.querySelector(`#watched`);
       const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
       body.appendChild(overlay);
@@ -89,7 +67,7 @@ const renderFilms = (container, filmsArray, group) => {
       emoji.addEventListener(`click`, changeEmojiListener);
       commentsArea.addEventListener(`keydown`, commentAddListener);
       ratingArea.addEventListener(`click`, changeRatingListener);
-      watchlistInput.addEventListener(`click`, changeWatchlistListener);
+      watchListInput.addEventListener(`click`, changeWatchlistListener);
       watchedInput.addEventListener(`click`, changeWatchedListener);
       favoriteInput.addEventListener(`click`, changeFavoriteListener);
     };
@@ -132,15 +110,11 @@ const renderFilms = (container, filmsArray, group) => {
 
 const initFilters = () => {
   const films = FilmStorage.get().getFilms();
-  console.log("films: ", films);
   const onFiltersClick = (evt) => {
     evt.preventDefault();
     const target = evt.target;
-    changeClassForActiveFilter(target);
-
     const filteredFilms = filterFilms(films, target.id);
-    console.log("filteredFilms: ", filteredFilms);
-
+    changeClassForActiveFilter(target);
     commonFilmsContainer.innerHTML = ``;
     renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
   };
@@ -170,11 +144,6 @@ const loadMoreFilms = () => {
 };
 
 loadMoreFilms();
-showMoreBtn.addEventListener(`click`, loadMoreFilms);
-
-//////////////////////////////////////////////////////////////////////
-
 renderFilters(FILTERS);
-// initFilmCardFilters();
 initFilters();
-
+showMoreBtn.addEventListener(`click`, loadMoreFilms);

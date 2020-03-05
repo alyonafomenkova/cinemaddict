@@ -72,7 +72,7 @@ function changeFavorite(film) {
 const observeFilmStorageSmallFilm = (evt, film, detailedFilmComponent) => {
   if (evt.type === FilmStorageEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
     const status = FilmStorage.get().getFilm(film.id).isOnWatchlist;
-    const watchlistInput = detailedFilmComponent.querySelector(`#watchlist`);
+    const watchlistInput = detailedFilmComponent.querySelector(`#addwatchlist`);
     updateInputControl(status, watchlistInput);
   }
 

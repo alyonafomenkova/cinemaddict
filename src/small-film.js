@@ -64,11 +64,4 @@ const observeFilmStorageDetailedFilm = (evt, film, filmComponent) => {
   }
 };
 
-function setListenersOnBtnControls(element, clickableAreaName, clickListener) {
-  const clickableArea = element.querySelector(clickableAreaName);
-  element.clickableArea = checkExists(clickableArea, `Clickable area '${clickableAreaName}' not found`);
-  element.clickableArea.addEventListener(`click`, clickListener);
-  element.areaClickListener = clickListener;
-}
-
 export {setSmallCardCommentsCount, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm, observeFilmStorageDetailedFilm};
