@@ -66,6 +66,7 @@ const generateFilmsData = () => ({
   actors: getShuffledSubarray(actors, ACTORS_COUNT),
   country: getRandomElement(country),
   year: getRandomDate(new Date(1970, 0, 1), new Date()),
+  userDate: Date.now() - getRandomNumber(0, 13) * 30 * 24 * 60 * 60 * 1000,
   duration: getRandomNumber(5280000, 11700000),
   genre: getRandomElement(genre),
   restriction: [2, 6, 12, 16, 18][Math.floor(Math.random() * 5)],
@@ -78,7 +79,7 @@ const generateFilmsData = () => ({
     }
   ],
   isOnWatchlist: false,
-  isWatched: false,
+  isWatched: true,//
   isFavorite: false
 });
 

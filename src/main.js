@@ -3,7 +3,8 @@ import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
 import {FILTERS, filtersList, renderFilters, changeClassForActiveFilter, filterFilms} from './filter.js';
 import {FilmStorage} from './film-storage.js';
 import {ElementBuilder} from './element-builder.js';
-import {Statistics} from './statistics.js';
+import {Statistics} from './statistics/statistics.js';
+import {hideStatistic} from './statistics/statistics-setup.js';
 import {KeyCode, FilmStorageEventType} from './constants';
 import {observeFilmStorageDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
 import {setDetailedCardCommentsCount, changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm} from './detailed-film';
@@ -116,6 +117,7 @@ const initFilters = () => {
     const target = evt.target;
     const filteredFilms = filterFilms(films, target.id);
     changeClassForActiveFilter(target);
+    hideStatistic();
     commonFilmsContainer.innerHTML = ``;
     renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
   };
@@ -150,17 +152,5 @@ initFilters();
 showMoreBtn.addEventListener(`click`, loadMoreFilms);
 
 ///// STATISTICS /////
-const statsBtn = document.querySelector(`.main-navigation__item--additional`);
-const statsContainer = document.querySelector(`.statistic`);
-
-const showStatistic = () => {
-  document.querySelector(`.films`).classList.add(`visually-hidden`);
-  statsContainer.classList.remove(`visually-hidden`);
-  const films = FilmStorage.get().getFilms();
-  console.log("films: ", films);/////
-  const statsComponent = new Statistics(films);
-  statsComponent.update(statsContainer);
-  statsComponent.renderCharts();
-};
-
+import {statsBtn, showStatistic} from './statistics/statistics-setup.js';
 statsBtn.addEventListener(`click`, showStatistic);
