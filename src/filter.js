@@ -1,5 +1,4 @@
 import {ElementBuilder} from './element-builder.js';
-import {FilmStorage} from "./film-storage";
 
 const FiltersId = {
   ALL: `all`,
@@ -53,21 +52,16 @@ const changeClassForActiveFilter = (filter) => {
 const filterFilms = (films, filterName) => {
   switch (filterName) {
     case FiltersId.ALL:
-      console.log("Это ALL");
       return films;
     case FiltersId.WATCHLIST:
-      console.log("Это WATCHLIST");
       return films.filter((film) => film.isOnWatchlist);
     case FiltersId.HISTORY:
-      console.log("Это HISTORY");
       return films.filter((film) => film.isWatched);
     case FiltersId.FAVORITES:
-      console.log("Это FAVORITES");
       return films.filter((film) => film.isFavorite);
     default:
-      throw new Error(`Unknown filter: ${filterName}`);
+      return [];
   }
-
 };
 
 export {FILTERS, filtersList, renderFilters, changeClassForActiveFilter, filterFilms};
