@@ -1,4 +1,16 @@
 
+const rank = {
+  'comedy': `Jim Carrey`,
+  'drama': `Julia Roberts`,
+  'horror': `Freddy Krueger`,
+  'action': `Sylvester Stallone`,
+  'adventure': `Johnny Depp`,
+  'war': `Anthony Quinn`,
+  'musical': `Yekaterina Guseva`,
+  'historical': `Marilyn Monroe`,
+  'science': `Doctor Who`
+};
+
 const getRandomNumber = (min, max) => min + Math.floor(Math.random() * (max + 1 - min));
 
 const getRandomElement = (array) => {
@@ -36,4 +48,8 @@ const checkExists = (value, message) => {
   return value;
 };
 
-export {getRandomNumber, getRandomElement, getShuffledSubarray, getSubarray, createElement, checkExists};
+const getRandomDate = (start, end) => {
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+};
+
+export {rank, getRandomNumber, getRandomElement, getShuffledSubarray, getSubarray, createElement, checkExists, getRandomDate};

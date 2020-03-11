@@ -1,30 +1,18 @@
-import {CountOfFilms} from './data.js';
+import {CountOfFilms, generateFilms} from './data.js';
 import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
-import makeFilter from './make-filter.js';
+import {FILTERS, filtersList, renderFilters, changeClassForActiveFilter, filterFilms} from './filter.js';
 import {FilmStorage} from './film-storage.js';
 import {ElementBuilder} from './element-builder.js';
+import {Statistics} from './statistics/statistics.js';
+import {hideStatistic} from './statistics/statistics-setup.js';
+import {KeyCode, FilmStorageEventType} from './constants';
+import {observeFilmStorageDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
+import {setDetailedCardCommentsCount, changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm} from './detailed-film';
+import moment from "moment";
 
-const FILTERS = [
-  {
-    name: `All movies`,
-    count: null,
-    isChecked: true
-  },
-  {
-    name: `Watchlist`,
-    count: 13
-  },
-  {
-    name: `History`,
-    count: 4
-  },
-  {
-    name: `Favorites`,
-    count: 8
-  }
-];
-const filtersContainer = document.querySelector(`.main-navigation`);
+const FILMS_PER_LOAD = 5;
 const filmsContainers = document.querySelectorAll(`.films-list__container`);
+const showMoreBtn = document.querySelector(`.films-list__show-more`);
 const commonFilmsContainer = filmsContainers[0];
 const topRatedFilmsContainer = filmsContainers[1];
 const mostCommentedFilmsContainer = filmsContainers[2];
@@ -33,52 +21,60 @@ const Group = {
   TOP_RATED: 1,
   MOST_COMMENTED: 2
 };
-const films = new FilmStorage();
-
-const renderFilters = (filters) => {
-  filters.reverse().forEach((item) => {
-    filtersContainer.insertAdjacentHTML(`afterbegin`, makeFilter(item.name, item.count, item.isChecked));
-  });
-};
-
-const updateFilms = () => {
-  const filtersList = filtersContainer.querySelectorAll(`.main-navigation__item`);
-  const onFiltersClick = (evt) => {
-    evt.preventDefault();
-    const target = evt.target;
-    const count = getRandomNumber(CountOfFilms.MIN, CountOfFilms.MAX);
-    const newArray = getSubarray(films._films, count);
-
-    commonFilmsContainer.innerHTML = ``;
-    renderFilms(commonFilmsContainer, newArray, Group.ALL);
-
-    filtersList.forEach((item) => {
-      item.classList.remove(`main-navigation__item--active`);
-    });
-    target.classList.add(`main-navigation__item--active`);
-  };
-
-  filtersList.forEach((item) => {
-    item.addEventListener(`click`, onFiltersClick);
-  });
-};
 
 const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
 
-  filmsArray.forEach((film) => {
+  filmsArray.map((film) => (film.id)).forEach((filmId) => {
     const overlay = ElementBuilder.createOverlay();
+    let commentAddListener = null;
+    let changeEmojiListener = null;
+    let changeRatingListener = null;
+    let changeWatchlistListener = null;
+    let changeWatchedListener = null;
+    let changeFavoriteListener = null;
 
     const onDetailedFilmClick = () => {
+      const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
+      const watchListInput = detailedFilmComponent.querySelector(`#addwatchlist`);
+      const watchedInput = detailedFilmComponent.querySelector(`#watched`);
+      const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
       body.removeChild(detailedFilmComponent);
       body.removeChild(overlay);
+      commentsArea.removeEventListener(`keydown`, commentAddListener);
+      watchListInput.removeEventListener(`click`, changeWatchlistListener);
+      watchedInput.removeEventListener(`click`, changeWatchedListener);
+      favoriteInput.removeEventListener(`click`, changeFavoriteListener);
     };
 
     const onSmallFilmClick = () => {
+      const film = FilmStorage.get().getFilm(filmId);
+      const emoji = detailedFilmComponent.querySelector(`.film-details__emoji-list`);
+      const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
+      const ratingArea = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
+      const watchListInput = detailedFilmComponent.querySelector(`#addwatchlist`);
+      const watchedInput = detailedFilmComponent.querySelector(`#watched`);
+      const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
       body.appendChild(overlay);
       body.appendChild(detailedFilmComponent);
+      setDetailedCardCommentsCount(film.comments.length);
+
+      changeEmojiListener = changeEmoji(detailedFilmComponent);
+      commentAddListener = addComment(film);
+      changeRatingListener = changeRating(detailedFilmComponent);
+      changeWatchlistListener = changeWatchlist(film);
+      changeWatchedListener = changeWatched(film);
+      changeFavoriteListener = changeFavorite(film);
+
+      emoji.addEventListener(`click`, changeEmojiListener);
+      commentsArea.addEventListener(`keydown`, commentAddListener);
+      ratingArea.addEventListener(`click`, changeRatingListener);
+      watchListInput.addEventListener(`click`, changeWatchlistListener);
+      watchedInput.addEventListener(`click`, changeWatchedListener);
+      favoriteInput.addEventListener(`click`, changeFavoriteListener);
     };
 
+    const film = FilmStorage.get().getFilm(filmId);
     let filmComponent;
 
     switch (group) {
@@ -96,7 +92,38 @@ const renderFilms = (container, filmsArray, group) => {
     }
 
     const detailedFilmComponent = ElementBuilder.buildDetailedFilmElement(film, onDetailedFilmClick);
+    const watchlistBtn = filmComponent.querySelector(`.film-card__controls-item--add-to-watchlist`);
+    const watchedBtn = filmComponent.querySelector(`.film-card__controls-item--mark-as-watched`);
+    const favoriteBtn = filmComponent.querySelector(`.film-card__controls-item--favorite`);
+    changeWatchlistListener = changeWatchlistOnSmallFilm(film);
+    changeWatchedListener = changeWatchedOnSmallFilm(film);
+    changeFavoriteListener = changeFavoriteOnSmallFilm(film);
     container.appendChild(filmComponent);
+
+    FilmStorage.get().addListener((evt) => {
+      observeFilmStorageDetailedFilm(evt, film, filmComponent);
+      observeFilmStorageSmallFilm(evt, film, detailedFilmComponent);
+    });
+    watchlistBtn.addEventListener(`click`, changeWatchlistListener);
+    watchedBtn.addEventListener(`click`, changeWatchedListener);
+    favoriteBtn.addEventListener(`click`, changeFavoriteListener);
+  });
+};
+
+const initFilters = () => {
+  const films = FilmStorage.get().getFilms();
+  const onFiltersClick = (evt) => {
+    evt.preventDefault();
+    const target = evt.target;
+    const filteredFilms = filterFilms(films, target.id);
+    changeClassForActiveFilter(target);
+    hideStatistic();
+    commonFilmsContainer.innerHTML = ``;
+    renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
+  };
+
+  filtersList.forEach((item) => {
+    item.addEventListener(`click`, onFiltersClick);
   });
 };
 
@@ -108,11 +135,22 @@ const onSuccess = (filmsArray) => {
   const topRatedFilms = getShuffledSubarray(filmsArray, CountOfFilms.EXTRA);
   const mostCommentedFilms = getShuffledSubarray(filmsArray, CountOfFilms.EXTRA);
 
-  renderFilms(commonFilmsContainer, filmsArray, Group.ALL);
-  renderFilms(topRatedFilmsContainer, topRatedFilms, Group.TOP_RATED);
-  renderFilms(mostCommentedFilmsContainer, mostCommentedFilms, Group.MOST_COMMENTED);
+  // renderFilms(commonFilmsContainer, filmsArray, Group.ALL);
+  // renderFilms(topRatedFilmsContainer, topRatedFilms, Group.TOP_RATED);
+  // renderFilms(mostCommentedFilmsContainer, mostCommentedFilms, Group.MOST_COMMENTED);
 };
 
+const loadMoreFilms = () => {
+  const films = generateFilms(FILMS_PER_LOAD);
+  FilmStorage.get().addFilms(films);
+  renderFilms(commonFilmsContainer, films, Group.ALL);
+};
+
+loadMoreFilms();
 renderFilters(FILTERS);
-films.load(onError, onSuccess);
-updateFilms();
+initFilters();
+showMoreBtn.addEventListener(`click`, loadMoreFilms);
+
+///// STATISTICS /////
+import {statsBtn, showStatistic} from './statistics/statistics-setup.js';
+statsBtn.addEventListener(`click`, showStatistic);
