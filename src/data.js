@@ -79,7 +79,7 @@ const generateFilmsData = () => ({
     }
   ],
   isOnWatchlist: false,
-  isWatched: true,//
+  isWatched: false,
   isFavorite: false
 });
 
