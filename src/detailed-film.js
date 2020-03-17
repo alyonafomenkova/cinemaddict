@@ -20,9 +20,9 @@ function addComment(film) {
     if (event.ctrlKey && event.keyCode === KeyCode.ENTER && textInput.value) {
       const storage = FilmStorage.get();
       const newComment = {};
-      newComment.text = textInput.value;
+      newComment.comment = textInput.value;
       newComment.author = `Ivan Inanov`;
-      newComment.emoji = document.querySelector(`.film-details__emoji-item:checked + label`).textContent;
+      newComment.emotion = document.querySelector(`.film-details__emoji-item:checked`).value;
       newComment.date = moment().toDate();
       storage.addComment(film.id, newComment);
       const comments = storage.getFilm(film.id).comments;
@@ -32,6 +32,15 @@ function addComment(film) {
       textInput.value = ``;
     }
   };
+}
+
+function getEmoji(emo) {
+  const emoji = {
+    grinning: `😀`,
+    sleeping: `😴`,
+    neutral: `😐`,
+  };
+  return emoji[emo];
 }
 
 function changeEmoji(detailedFilmComponent) {
@@ -89,4 +98,4 @@ const observeFilmStorageSmallFilm = (evt, film, detailedFilmComponent) => {
   }
 };
 
-export {setDetailedCardCommentsCount, addComment, changeEmoji, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm};
+export {setDetailedCardCommentsCount, getEmoji, addComment, changeEmoji, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm};
