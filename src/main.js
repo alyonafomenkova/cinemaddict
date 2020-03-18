@@ -20,6 +20,11 @@ const Group = {
   TOP_RATED: 1,
   MOST_COMMENTED: 2
 };
+///// SERVER //////////////
+import {Network} from './network';
+const AUTHORIZATION = `Basic dXNlckBwYXNzd35yZAo=${Math.random()}`;
+const END_POINT = `https://es8-demo-srv.appspot.com/moowle`;
+export const network = new Network({endPoint: END_POINT, authorization: AUTHORIZATION});
 
 const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
@@ -148,11 +153,9 @@ import {Message} from './constants.js';
 statsBtn.addEventListener(`click`, showStatistic);
 
 ///// SERVER /////
-import {Network} from './network';
-const AUTHORIZATION = `Basic dXNlckBwYXNzd35yZAo=${Math.random()}`;
-const END_POINT = `https://es8-demo-srv.appspot.com/moowle`;
+
 const FILMS_STEP = 5;
-const network = new Network({endPoint: END_POINT, authorization: AUTHORIZATION});
+
 const filmsLoader = document.querySelector(`.films-list__show-more`);
 const messageContainer = document.querySelector(`.films-list__title`);
 let allFilms; //
@@ -184,7 +187,8 @@ network.getFilms()
     FilmStorage.get().addFilms(films);
     hideLoadingMessage();
     allFilms = films;
-    return loadMoreFilms(FILMS_STEP);
+    let result = loadMoreFilms(FILMS_STEP);
+    return result;
   })
   .catch(() => {
     showLoadingMessage(Message.ERROR);
@@ -194,7 +198,6 @@ let renderedFilms = [];
 let from = 0;
 
 function loadMoreFilms(count) {
-  console.log("loadMoreFilms    allFilms: ", allFilms);
   let to = from + count - 1;
 
   if (to >= allFilms.length) {
@@ -211,17 +214,16 @@ function loadMoreFilms(count) {
 
   from = renderedFilms.length;
 
-  console.log("renderedFilms: ", renderedFilms);
-
   if (renderedFilms.length === allFilms.length) {
-    console.log("Показаны все фильмы...");
     filmsLoader.classList.add(`visually-hidden`);
   }
 
   commonFilmsContainer.innerHTML = ``;
+  topRatedFilmsContainer.innerHTML = ``;
+  mostCommentedFilmsContainer.innerHTML = ``;
   renderFilms(commonFilmsContainer, renderedFilms, Group.ALL);
-  //renderFilms(topRatedFilmsContainer, getRatedFilms(renderedFilms), Group.TOP_RATED);
-  //renderFilms(mostCommentedFilmsContainer, getCommentedFilms(renderedFilms), Group.MOST_COMMENTED);
+  renderFilms(topRatedFilmsContainer, getRatedFilms(renderedFilms), Group.TOP_RATED);
+  renderFilms(mostCommentedFilmsContainer, getCommentedFilms(renderedFilms), Group.MOST_COMMENTED);
 }
 
 function onLoaderClick(evt) {

@@ -1,6 +1,7 @@
 import {FilmStorageEventType, KeyCode} from "./constants";
 import {FilmStorage} from "./film-storage";
 import {ElementBuilder} from './element-builder.js';
+import {network} from './main.js';
 import moment from 'moment';
 
 const setDetailedCardCommentsCount = (count) => {
@@ -10,6 +11,15 @@ const setDetailedCardCommentsCount = (count) => {
 
 const updateInputControl = (status, input) => {
   status ? input.checked = true : input.checked = false;
+};
+
+const shake = (element) => {
+  const ANIMATION_TIMEOUT = 600;
+  element.style.animation = `shake ${ANIMATION_TIMEOUT / 1000}s`;
+
+  setTimeout(() => {
+    element.style.animation = ``;
+  }, ANIMATION_TIMEOUT);
 };
 
 function addComment(film) {
@@ -24,21 +34,34 @@ function addComment(film) {
       newComment.author = `Ivan Inanov`;
       newComment.emotion = document.querySelector(`.film-details__emoji-item:checked`).value;
       newComment.date = moment().toDate();
-      storage.addComment(film.id, newComment);
-      const comments = storage.getFilm(film.id).comments;
-      document.querySelector(`.film-details__add-emoji`).checked = false;
-      commentsList.innerHTML = ElementBuilder.templateForComments(film);
-      setDetailedCardCommentsCount(comments.length);
-      textInput.value = ``;
+      textInput.disabled = true;
+      textInput.style.border = `none`;
+
+      network.updateFilm({id: film.id, data: film.toRAW()})
+        .then(() => {
+          storage.addComment(film.id, newComment);
+          const comments = storage.getFilm(film.id).comments;
+          document.querySelector(`.film-details__add-emoji`).checked = false;
+          commentsList.innerHTML = ElementBuilder.templateForComments(film);
+          setDetailedCardCommentsCount(comments.length);
+          textInput.value = ``;
+          textInput.disabled = false;
+        })
+        .catch(() => {
+          textInput.style.border = `5px solid red`;
+          shake(textInput);
+          textInput.disabled = false;
+        });
     }
   };
 }
 
 function getEmoji(emo) {
   const emoji = {
-    grinning: `😀`,
-    sleeping: `😴`,
-    neutral: `😐`,
+    "grinning": `😀`,
+    "sleeping": `😴`,
+    "neutral": `😐`,
+    "neutral-face": `😐`,
   };
   return emoji[emo];
 }

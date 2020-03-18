@@ -59,7 +59,7 @@ class Network {
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then(toJSON)
-      .then(Adapter.parseFilms);
+      .then(Adapter.parseFilm);
   }
 
   deleteFilm({id}) {

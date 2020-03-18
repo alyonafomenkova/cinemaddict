@@ -22,6 +22,31 @@ class Adapter {
     this.userDate = new Date(data.user_details[`watching_date`]);
   }
 
+  toRAW() {
+    return {
+      'id': this.id,
+      'comments': this.comments,
+      'title': this.title,
+      'alternative_title': this.altTitle,
+      'poster': this.poster,
+      'description': this.description,
+      'totalRating': this.totalRating,
+      'actors': this.actors,
+      'restriction': this.restriction,
+      'director': this.director,
+      'writers': this.writers,
+      'genre': this.genre,
+      'duration': this.duration,
+      'date': this.date,
+      'country': this.country,
+      'watchlist': this.isOnWatchlist,
+      'already_watched': this.isWatched,
+      'favorite': this.isFavorite,
+      'personal_rating': this.userRating,
+      'watching_date': this.userDate,
+    };
+  }
+
   static parseFilm(data) {
     return new Adapter(data);
   }
