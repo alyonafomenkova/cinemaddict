@@ -31,13 +31,20 @@ class ElementBuilder {
       <p class="film-card__rating">${film.totalRating}</p>
       <p class="film-card__info">
         <span class="film-card__year">${moment(film.date).format(`YYYY`)}</span>
-        <span class="film-card__duration">${moment.duration(film.duration).hours()}:${moment.duration(film.duration).minutes()}</span>
+        <span class="film-card__duration">
+        ${moment.duration(film.duration * 1000 * 60).hours()}:${moment.duration(film.duration * 1000 * 60).minutes()}
+        </span>
         <span class="film-card__genre">${film.genre.join(` `)}</span>
       </p>
       <img src="./${film.poster}" alt="" class="film-card__poster">
       <p class="film-card__description">${film.description}</p>
       <button class="film-card__comments">${film.comments.length} comments</button>
-   </article>`.trim();
+      <form class="film-card__controls visually-hidden">
+        <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${film.isOnWatchlist && `film-card__controls-item--active`}">Add to watchlist</button>
+        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched ${film.isWatched && `film-card__controls-item--active`}">Mark as watched</button>
+        <button class="film-card__controls-item button film-card__controls-item--favorite ${film.isFavorite && `film-card__controls-item--active`}">Mark as favorite</button>
+      </form>
+    </article>`.trim();
   }
 
   static templateForDetailedFilm(film) {
