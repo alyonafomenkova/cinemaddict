@@ -68,6 +68,29 @@ class FilmStorage {
     }
   }
 
+  notifyUserRatingChange(filmId, userRating) {
+    this._listeners.forEach((listener) => {
+      const evt = {
+        type: FilmStorageEventType.USER_RATING_CHANGED,
+        filmId,
+        userRating
+      };
+      listener(evt);
+    });
+  }
+
+  changeUserRating(filmId, userRating) {
+    let film = this._filmsMap.get(filmId);
+
+    if (film) {
+      this._filmsMap.set(filmId, film);
+      this.notifyUserRatingChange(filmId, userRating);
+      console.log(`film with ID = ${filmId}`);
+    } else {
+      throw new Error(`Film with ID ${filmId} not found`);
+    }
+  }
+
   notifyWatchlistChange(filmId, isOnWatchlist) {
     this._listeners.forEach((listener) => {
       const evt = {

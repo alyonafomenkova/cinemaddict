@@ -65,7 +65,7 @@ const renderFilms = (container, filmsArray, group) => {
 
       changeEmojiListener = changeEmoji(detailedFilmComponent);
       commentAddListener = addComment(film);
-      changeRatingListener = changeRating(detailedFilmComponent);
+      changeRatingListener = changeRating(film, detailedFilmComponent);
       changeWatchlistListener = changeWatchlist(film);
       changeWatchedListener = changeWatched(film);
       changeFavoriteListener = changeFavorite(film);
