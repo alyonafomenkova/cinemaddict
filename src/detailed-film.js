@@ -1,6 +1,7 @@
 import {FilmStorageEventType, KeyCode} from "./constants";
 import {FilmStorage} from "./film-storage";
 import {ElementBuilder} from './element-builder.js';
+import {network} from './main.js';
 import moment from 'moment';
 
 const setDetailedCardCommentsCount = (count) => {
@@ -12,6 +13,15 @@ const updateInputControl = (status, input) => {
   status ? input.checked = true : input.checked = false;
 };
 
+const shake = (element) => {
+  const ANIMATION_TIMEOUT = 600;
+  element.style.animation = `shake ${ANIMATION_TIMEOUT / 1000}s`;
+
+  setTimeout(() => {
+    element.style.animation = ``;
+  }, ANIMATION_TIMEOUT);
+};
+
 function addComment(film) {
   return function () {
     const textInput = document.querySelector(`.film-details__comment-input`);
@@ -20,18 +30,40 @@ function addComment(film) {
     if (event.ctrlKey && event.keyCode === KeyCode.ENTER && textInput.value) {
       const storage = FilmStorage.get();
       const newComment = {};
-      newComment.text = textInput.value;
+      newComment.comment = textInput.value;
       newComment.author = `Ivan Inanov`;
-      newComment.emoji = document.querySelector(`.film-details__emoji-item:checked + label`).textContent;
+      newComment.emotion = document.querySelector(`.film-details__emoji-item:checked`).value;
       newComment.date = moment().toDate();
-      storage.addComment(film.id, newComment);
-      const comments = storage.getFilm(film.id).comments;
-      document.querySelector(`.film-details__add-emoji`).checked = false;
-      commentsList.innerHTML = ElementBuilder.templateForComments(film);
-      setDetailedCardCommentsCount(comments.length);
-      textInput.value = ``;
+      textInput.disabled = true;
+      textInput.style.border = `none`;
+
+      network.updateFilm({id: film.id, data: film.toRAW()})
+        .then(() => {
+          storage.addComment(film.id, newComment);
+          const comments = storage.getFilm(film.id).comments;
+          document.querySelector(`.film-details__add-emoji`).checked = false;
+          commentsList.innerHTML = ElementBuilder.templateForComments(film);
+          setDetailedCardCommentsCount(comments.length);
+          textInput.value = ``;
+          textInput.disabled = false;
+        })
+        .catch(() => {
+          textInput.style.border = `5px solid red`;
+          shake(textInput);
+          textInput.disabled = false;
+        });
     }
   };
+}
+
+function getEmoji(emo) {
+  const emoji = {
+    "grinning": `😀`,
+    "sleeping": `😴`,
+    "neutral": `😐`,
+    "neutral-face": `😐`,
+  };
+  return emoji[emo];
 }
 
 function changeEmoji(detailedFilmComponent) {
@@ -41,10 +73,37 @@ function changeEmoji(detailedFilmComponent) {
   };
 }
 
-function changeRating(detailedFilmComponent) {
+function toggleCheckedButton(detailedFilmComponent, targetInput) {
+  const buttons = detailedFilmComponent.querySelectorAll(`.film-details__user-rating-label`);
+  buttons.forEach((button) => button.style.backgroundColor = `#d8d8d8`);
+  targetInput.style.backgroundColor = (`#ffe800`);
+}
+
+function changeRating(film, detailedFilmComponent) {
   return function () {
-    const userRating = detailedFilmComponent.querySelector(`.film-details__user-rating-input:checked`).value;
-    detailedFilmComponent.querySelector(`.film-details__user-rating span`).innerHTML = userRating;
+    event.preventDefault();
+    const targetButton = event.target;
+    const userRatingForm = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
+
+    userRatingForm.style.pointerEvents = `none`;
+    userRatingForm.style.opacity = `0.5`;
+    userRatingForm.style.border = `none`;
+
+    network.updateFilm({id: film.id, data: film.toRAW()})
+      .then(() => {
+        targetButton.checked = true;
+        toggleCheckedButton(detailedFilmComponent, targetButton);
+        FilmStorage.get().changeUserRating(film.id, targetButton.textContent);
+        detailedFilmComponent.querySelector(`.film-details__user-rating span`).innerHTML = targetButton.textContent;
+        userRatingForm.style.opacity = `1`;
+        userRatingForm.style.pointerEvents = `auto`;
+      })
+      .catch(() => {
+        userRatingForm.style.border = `1px solid red`;
+        shake(userRatingForm);
+        userRatingForm.style.opacity = `1`;
+        userRatingForm.style.pointerEvents = `auto`;
+      });
   };
 }
 
@@ -89,4 +148,4 @@ const observeFilmStorageSmallFilm = (evt, film, detailedFilmComponent) => {
   }
 };
 
-export {setDetailedCardCommentsCount, addComment, changeEmoji, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm};
+export {setDetailedCardCommentsCount, getEmoji, addComment, changeEmoji, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm};

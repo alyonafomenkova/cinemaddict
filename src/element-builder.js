@@ -1,4 +1,5 @@
 import {createElement, checkExists} from './util.js';
+import {getEmoji} from './detailed-film.js';
 import moment from 'moment';
 
 class ElementBuilder {
@@ -6,13 +7,13 @@ class ElementBuilder {
     return `
     <article class="film-card">
       <h3 class="film-card__title">${film.title}</h3>
-      <p class="film-card__rating">${film.rating}</p>
+      <p class="film-card__rating">${film.totalRating}</p>
       <p class="film-card__info">
-        <span class="film-card__year">${moment(film.year).format(`YYYY`)}</span>
-        <span class="film-card__duration">${moment.duration(film.duration).hours()}:${moment.duration(film.duration).minutes()}</span>
-        <span class="film-card__genre">${film.genre}</span>
+        <span class="film-card__year">${moment(film.date).format(`YYYY`)}</span>
+        <span class="film-card__duration">${moment.duration(film.duration * 1000 * 60).hours()}:${moment.duration(film.duration * 1000 * 60).minutes()}</span>
+        <span class="film-card__genre">${film.genre.join(` `)}</span>
       </p>
-      <img src="./images/posters/${film.posters}" alt="" class="film-card__poster">
+      <img src="./${film.poster}" alt="" class="film-card__poster">
       <p class="film-card__description">${film.description}</p>
       <button class="film-card__comments">${film.comments.length} comments</button>
       <form class="film-card__controls">
@@ -27,16 +28,23 @@ class ElementBuilder {
     return `
     <article class="film-card film-card--no-controls">
       <h3 class="film-card__title">${film.title}</h3>
-      <p class="film-card__rating">${film.rating}</p>
+      <p class="film-card__rating">${film.totalRating}</p>
       <p class="film-card__info">
-        <span class="film-card__year">${moment(film.year).format(`YYYY`)}</span>
-        <span class="film-card__duration">${moment.duration(film.duration).hours()}:${moment.duration(film.duration).minutes()}</span>
-        <span class="film-card__genre">${film.genre}</span>
+        <span class="film-card__year">${moment(film.date).format(`YYYY`)}</span>
+        <span class="film-card__duration">
+        ${moment.duration(film.duration * 1000 * 60).hours()}:${moment.duration(film.duration * 1000 * 60).minutes()}
+        </span>
+        <span class="film-card__genre">${film.genre.join(` `)}</span>
       </p>
-      <img src="./images/posters/${film.posters}" alt="" class="film-card__poster">
+      <img src="./${film.poster}" alt="" class="film-card__poster">
       <p class="film-card__description">${film.description}</p>
       <button class="film-card__comments">${film.comments.length} comments</button>
-   </article>`.trim();
+      <form class="film-card__controls visually-hidden">
+        <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${film.isOnWatchlist && `film-card__controls-item--active`}">Add to watchlist</button>
+        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched ${film.isWatched && `film-card__controls-item--active`}">Mark as watched</button>
+        <button class="film-card__controls-item button film-card__controls-item--favorite ${film.isFavorite && `film-card__controls-item--active`}">Mark as favorite</button>
+      </form>
+    </article>`.trim();
   }
 
   static templateForDetailedFilm(film) {
@@ -48,7 +56,7 @@ class ElementBuilder {
       </div>
       <div class="film-details__info-wrap">
         <div class="film-details__poster">
-          <img class="film-details__poster-img" src="images/posters/${film.posters}" alt="${film.posters}">
+          <img class="film-details__poster-img" src="./${film.poster}" alt="${film.poster}">
 
           <p class="film-details__age">${film.restriction}+</p>
         </div>
@@ -61,7 +69,7 @@ class ElementBuilder {
             </div>
 
             <div class="film-details__rating">
-              <p class="film-details__total-rating">${film.rating}</p>
+              <p class="film-details__total-rating">${film.totalRating}</p>
               <p class="film-details__user-rating">Your rate <span>${film.userRating}</span></p>
             </div>
           </div>
@@ -73,7 +81,7 @@ class ElementBuilder {
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Writers</td>
-              <td class="film-details__cell">${film.writer}</td>
+              <td class="film-details__cell">${film.writers.join(`, `)}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Actors</td>
@@ -81,11 +89,11 @@ class ElementBuilder {
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Release Date</td>
-              <td class="film-details__cell">${moment(film.year).format(`DD MMMM YYYY`)}</td>
+              <td class="film-details__cell">${moment(film.date).format(`DD MMMM YYYY`)} (${film.country})</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Runtime</td>
-              <td class="film-details__cell">${Math.floor(moment.duration(film.duration).asMinutes())}</td>
+              <td class="film-details__cell">${Math.floor(moment.duration(film.duration * 1000 * 60).asMinutes())} min</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Country</td>
@@ -94,7 +102,7 @@ class ElementBuilder {
             <tr class="film-details__row">
               <td class="film-details__term">Genres</td>
               <td class="film-details__cell">
-                <span class="film-details__genre">${film.genre}</span>
+                <span class="film-details__genre">${film.genre.join(` `)}</span>
               </td>
             </tr>
           </table>
@@ -149,7 +157,7 @@ class ElementBuilder {
 
         <div class="film-details__user-score">
           <div class="film-details__user-rating-poster">
-            <img src="images/posters/${film.posters}" alt="film-poster" class="film-details__user-rating-img">
+            <img src="./${film.poster}" alt="film-poster" class="film-details__user-rating-img">
           </div>
 
           <section class="film-details__user-rating-inner">
@@ -205,9 +213,9 @@ class ElementBuilder {
   static templateForComments(film) {
     return film.comments.map((comment) => `
       <li class="film-details__comment">
-        <span class="film-details__comment-emoji">${comment.emoji}</span>
+        <span class="film-details__comment-emoji">${getEmoji(comment.emotion)}</span>
         <div>
-          <p class="film-details__comment-text">${comment.text}</p>
+          <p class="film-details__comment-text">${comment.comment}</p>
           <p class="film-details__comment-info">
             <span class="film-details__comment-author">${comment.author}</span>
             <span class="film-details__comment-day">${moment(comment.date).startOf(`min`).fromNow()}</span>

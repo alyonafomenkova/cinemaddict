@@ -12,7 +12,6 @@ import moment from "moment";
 
 const FILMS_PER_LOAD = 5;
 const filmsContainers = document.querySelectorAll(`.films-list__container`);
-const showMoreBtn = document.querySelector(`.films-list__show-more`);
 const commonFilmsContainer = filmsContainers[0];
 const topRatedFilmsContainer = filmsContainers[1];
 const mostCommentedFilmsContainer = filmsContainers[2];
@@ -21,6 +20,11 @@ const Group = {
   TOP_RATED: 1,
   MOST_COMMENTED: 2
 };
+///// SERVER //////////////
+import {Network} from './network';
+const AUTHORIZATION = `Basic dXNlckBwYXNzd35yZAo=${Math.random()}`;
+const END_POINT = `https://es8-demo-srv.appspot.com/moowle`;
+export const network = new Network({endPoint: END_POINT, authorization: AUTHORIZATION});
 
 const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
@@ -61,7 +65,7 @@ const renderFilms = (container, filmsArray, group) => {
 
       changeEmojiListener = changeEmoji(detailedFilmComponent);
       commentAddListener = addComment(film);
-      changeRatingListener = changeRating(detailedFilmComponent);
+      changeRatingListener = changeRating(film, detailedFilmComponent);
       changeWatchlistListener = changeWatchlist(film);
       changeWatchedListener = changeWatched(film);
       changeFavoriteListener = changeFavorite(film);
@@ -140,17 +144,91 @@ const onSuccess = (filmsArray) => {
   // renderFilms(mostCommentedFilmsContainer, mostCommentedFilms, Group.MOST_COMMENTED);
 };
 
-const loadMoreFilms = () => {
-  const films = generateFilms(FILMS_PER_LOAD);
-  FilmStorage.get().addFilms(films);
-  renderFilms(commonFilmsContainer, films, Group.ALL);
-};
-
-loadMoreFilms();
 renderFilters(FILTERS);
 initFilters();
-showMoreBtn.addEventListener(`click`, loadMoreFilms);
 
 ///// STATISTICS /////
 import {statsBtn, showStatistic} from './statistics/statistics-setup.js';
+import {Message} from './constants.js';
 statsBtn.addEventListener(`click`, showStatistic);
+
+///// SERVER /////
+
+const FILMS_STEP = 5;
+
+const filmsLoader = document.querySelector(`.films-list__show-more`);
+const messageContainer = document.querySelector(`.films-list__title`);
+let allFilms; //
+
+const showLoadingMessage = (text) => {
+  messageContainer.classList.remove(`visually-hidden`);
+  messageContainer.textContent = text;
+};
+
+const hideLoadingMessage = () => {
+  messageContainer.classList.add(`visually-hidden`);
+};
+
+const getRatedFilms = (films) => {
+  return films.slice()
+    .sort((left, right) => Number(right.totalRating) - Number(left.totalRating)).slice(0, 2);
+};
+
+const getCommentedFilms = (films) => {
+  return films.slice()
+    .sort((left, right) => right.comments.length - left.comments.length).slice(0, 2);
+};
+
+showLoadingMessage(Message.LOADING);
+
+network.getFilms()
+  .then((films) => {
+    console.log("Фильмы с сервера: ", films);
+    FilmStorage.get().addFilms(films);
+    hideLoadingMessage();
+    allFilms = films;
+    let result = loadMoreFilms(FILMS_STEP);
+    return result;
+  })
+  .catch(() => {
+    showLoadingMessage(Message.ERROR);
+  });
+
+let renderedFilms = [];
+let from = 0;
+
+function loadMoreFilms(count) {
+  let to = from + count - 1;
+
+  if (to >= allFilms.length) {
+    to = allFilms.length - 1;
+  }
+
+  if (from > allFilms.length) {
+    return;
+  }
+
+  for (let i = from; i <= to; i++) {
+    renderedFilms.push(allFilms[i]);
+  }
+
+  from = renderedFilms.length;
+
+  if (renderedFilms.length === allFilms.length) {
+    filmsLoader.classList.add(`visually-hidden`);
+  }
+
+  commonFilmsContainer.innerHTML = ``;
+  topRatedFilmsContainer.innerHTML = ``;
+  mostCommentedFilmsContainer.innerHTML = ``;
+  renderFilms(commonFilmsContainer, renderedFilms, Group.ALL);
+  renderFilms(topRatedFilmsContainer, getRatedFilms(renderedFilms), Group.TOP_RATED);
+  renderFilms(mostCommentedFilmsContainer, getCommentedFilms(renderedFilms), Group.MOST_COMMENTED);
+}
+
+function onLoaderClick(evt) {
+  evt.preventDefault();
+  loadMoreFilms(FILMS_PER_LOAD);
+}
+
+filmsLoader.addEventListener(`click`, onLoaderClick);
