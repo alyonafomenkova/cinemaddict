@@ -1,9 +1,13 @@
 import {FilmStorageEventType} from "./constants";
 
+const FILMS_STORE_KEY = `films-store-key`;
+
 class FilmStorage {
 
-  constructor() {
-    this._filmsMap = new Map();
+  constructor({key, storage}) {
+    //this._filmsMap = new Map();
+    this._storeKey = key; // имя ячейки в localStorage в которую он будет записывать данные
+    this._storage = storage;
     this._listeners = [];
     this.addListener = this.addListener.bind(this);
   }
@@ -11,20 +15,63 @@ class FilmStorage {
   static get() {
     if (!this._instance) {
       console.log(`Creating FilmStorage singleton instance`);
-      this._instance = new FilmStorage();
+      this._instance = new FilmStorage({key: FILMS_STORE_KEY, storage: localStorage});
     }
     return this._instance;
   }
 
-  getFilm(filmId) {
-    let film = this._filmsMap.get(filmId);
+  //
+  setItem({key, item}) {
+    const items = this.getAll();
+    items[key] = item;
 
-    if (film) {
-      return film;
-    } else {
-      throw new Error(`Film with ID ${filmId} not found`);
+    this._storage.setItem(this._storeKey, JSON.stringify(items));
+  }
+
+  getItem({key}) {
+    const items = this.getAll();
+    return items[key];
+  }
+
+  removeItem({key}) {
+    const items = this.getAll();
+    delete items[key];
+
+    this._storage.setItem(this._storeKey, JSON.stringify(items));
+  }
+
+  getAll() {
+    const emptyItems = {};
+    const items = this._storage.getItem(this._storeKey);
+
+    if (!items) {
+      return emptyItems;
+    }
+
+    try {
+      return JSON.parse(items);
+    } catch (e) {
+      console.error(`Error parse items. Error: ${e}. Items: ${items}`);
+      return emptyItems;
     }
   }
+  //
+
+  // getFilm(filmId) {
+  //   let film = this._filmsMap.get(filmId);
+  //
+  //   if (film) {
+  //     return film;
+  //   } else {
+  //     throw new Error(`Film with ID ${filmId} not found`);
+  //   }
+  //
+  //   /*
+  //     const rawTasksMap = this._store.getAll();
+  //     const rawTasks = objectToArray(rawTasksMap);
+  //     const tasks = ModelTask.parseTasks(rawTasks);
+  //   */
+  // }
 
   getFilms() {
     const filmsArray = Array.from(this._filmsMap.values());

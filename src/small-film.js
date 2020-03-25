@@ -1,13 +1,37 @@
 import {FilmStorageEventType} from "./constants";
 import {FilmStorage} from "./film-storage";
-import {checkExists} from "./util";
+import {ElementBuilder} from "./element-builder";
 
-const setSmallCardCommentsCount = (filmComponent, count) => {
+export const Group = {
+  ALL: 0,
+  TOP_RATED: 1,
+  MOST_COMMENTED: 2
+};
+
+export let filmComponent;
+
+export const createFilmComponent = (group, film, onSmallFilmClick) => {
+  switch (group) {
+    case Group.ALL:
+      filmComponent = ElementBuilder.buildSmallFilmElement(film, onSmallFilmClick);
+      break;
+    case Group.TOP_RATED:
+      filmComponent = ElementBuilder.buildExtraSmallFilmElement(film, onSmallFilmClick);
+      break;
+    case Group.MOST_COMMENTED:
+      filmComponent = ElementBuilder.buildExtraSmallFilmElement(film, onSmallFilmClick);
+      break;
+    default:
+      throw new Error(`Unknown group type: ${group}`);
+  }
+};
+
+export const setSmallCardCommentsCount = (filmComponent, count) => {
   const commentsCountField = filmComponent.querySelector(`.film-card__comments`);
   commentsCountField.innerHTML = count + ` comments`;
 };
 
-function changeWatchlistOnSmallFilm(film) {
+export function changeWatchlistOnSmallFilm(film) {
   return function () {
     event.preventDefault();
     const storage = FilmStorage.get();
@@ -15,7 +39,7 @@ function changeWatchlistOnSmallFilm(film) {
   };
 }
 
-function changeWatchedOnSmallFilm(film) {
+export function changeWatchedOnSmallFilm(film) {
   return function () {
     event.preventDefault();
     const storage = FilmStorage.get();
@@ -23,7 +47,7 @@ function changeWatchedOnSmallFilm(film) {
   };
 }
 
-function changeFavoriteOnSmallFilm(film) {
+export function changeFavoriteOnSmallFilm(film) {
   return function () {
     event.preventDefault();
     const storage = FilmStorage.get();
@@ -39,7 +63,7 @@ const updateBtnStatus = (status, btn) => {
   }
 };
 
-const observeFilmStorageDetailedFilm = (evt, film, filmComponent) => {
+export const observeFilmStorageDetailedFilm = (evt, film, filmComponent) => {
   if (evt.type === FilmStorageEventType.COMMENT_ADDED && evt.filmId === film.id) {
     const count = FilmStorage.get().getFilm(film.id).comments.length;
     setSmallCardCommentsCount(filmComponent, count);
@@ -63,5 +87,3 @@ const observeFilmStorageDetailedFilm = (evt, film, filmComponent) => {
     updateBtnStatus(status, favoriteBtn);
   }
 };
-
-export {setSmallCardCommentsCount, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm, observeFilmStorageDetailedFilm};

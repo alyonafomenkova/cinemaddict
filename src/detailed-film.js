@@ -2,6 +2,7 @@ import {FilmStorageEventType, KeyCode} from "./constants";
 import {FilmStorage} from "./film-storage";
 import {ElementBuilder} from './element-builder.js';
 import {network} from './main.js';
+import {provider} from './main.js';//
 import moment from 'moment';
 
 const setDetailedCardCommentsCount = (count) => {
@@ -37,7 +38,7 @@ function addComment(film) {
       textInput.disabled = true;
       textInput.style.border = `none`;
 
-      network.updateFilm({id: film.id, data: film.toRAW()})
+      provider.updateFilm({id: film.id, data: film.toRAW()})////network -> provider
         .then(() => {
           storage.addComment(film.id, newComment);
           const comments = storage.getFilm(film.id).comments;
