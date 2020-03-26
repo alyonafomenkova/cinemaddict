@@ -29,6 +29,7 @@ export const createFilmComponent = (group, film, onSmallFilmClick) => {
 
 export const setSmallCardCommentsCount = (filmComponent, count) => {
   const commentsCountField = filmComponent.querySelector(`.film-card__comments`);
+  console.log("setSmallCardCommentsCount: ", count);
   commentsCountField.innerHTML = count + ` comments`;
 };
 
@@ -67,6 +68,7 @@ const updateBtnStatus = (status, btn) => {
 export const observeFilmStorageDetailedFilm = (evt, film, filmComponent) => {
   if (evt.type === ProviderEventType.COMMENT_ADDED && evt.filmId === film.id) {
     const count = Provider.get().getFilm(film.id).comments.length;
+    console.log(["SMALL count: ", count]);
     setSmallCardCommentsCount(filmComponent, count);
   }
 

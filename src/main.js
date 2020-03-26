@@ -13,7 +13,7 @@ import {setDetailedCardCommentsCount, changeEmoji, addComment, changeRating, cha
 import moment from "moment";
 
 const FILMS_PER_LOAD = 5;
-const AUTHORIZATION = `Basic dXNlckBwYXNzdffyZAo=${Math.random()}`;
+const AUTHORIZATION = `Basic dXNlckBwYXNzdffysAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/moowle`;
 const FILMS_STORE_KEY = `films-store-key`;
 const filmsContainers = document.querySelectorAll(`.films-list__container`);

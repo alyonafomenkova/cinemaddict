@@ -39,6 +39,39 @@ const Provider = class {
   //   }
   // }
 
+  //
+  notifyFilmCommentAdded(filmId, comment) {
+    this._listeners.forEach((listener) => {
+      const evt = {
+        type: ProviderEventType.COMMENT_ADDED,
+        filmId,
+        comment
+      };
+      listener(evt);
+    });
+  }
+
+  addComment(filmId, comment) {
+    console.log("[PROVIDER addComment filmId: ]", filmId);
+    console.log("[PROVIDER addComment comment: ]", comment);
+    let film = this.getFilm(filmId);
+
+    if (film) {
+      film.comments.push(comment);
+      this._storage.setItem({key: filmId, item: film});
+      this.notifyFilmCommentAdded(filmId, comment);
+      console.log(`Comment has been updated for film with ID = ${filmId}`);
+    } else {
+      throw new Error(`Film with ID ${filmId} not found`);
+    }
+  }
+  //
+
+  getFilm(filmId) {
+    const films = objectToArray(this._storage.getAll());
+    return films[filmId];
+  }
+
   getFilms() {
     if (this._isOnline()) {
       return this._network.getFilms()

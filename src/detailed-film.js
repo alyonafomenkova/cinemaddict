@@ -7,6 +7,7 @@ import moment from 'moment';
 
 const setDetailedCardCommentsCount = (count) => {
   const commentsCountField = document.querySelector(`.film-details__comments-count`);
+  console.log("setDetailedCardCommentsCount: ", count);
   commentsCountField.innerHTML = count;
 };
 
@@ -29,7 +30,8 @@ function addComment(film) {
     const commentsList = document.querySelector(`.film-details__comments-list`);
 
     if (event.ctrlKey && event.keyCode === KeyCode.ENTER && textInput.value) {
-      const storage = FilmStorage.get();
+      //const storage = FilmStorage.get();
+      const provider = Provider.get();
       const newComment = {};
       newComment.comment = textInput.value;
       newComment.author = `Ivan Inanov`;
@@ -38,22 +40,42 @@ function addComment(film) {
       textInput.disabled = true;
       textInput.style.border = `none`;
 
-      // provider.updateFilm({id: film.id, data: film.toRAW()})////network -> provider
-      Provider.get().updateFilm({id: film.id, data: film.toRAW()})// //network -> provider
+      Provider.get().updateFilm({id: film.id, data: newComment})
         .then(() => {
-          storage.addComment(film.id, newComment);
-          const comments = storage.getFilm(film.id).comments;
+          console.log("[DET] addComment film.id: ", film.id);
+          console.log("[DET] addComment newComment: ", newComment);
+          provider.addComment(film.id, newComment);
+          const comments = provider.getFilm(film.id).comments;//
+          console.log("comments: ", comments);
           document.querySelector(`.film-details__add-emoji`).checked = false;
-          commentsList.innerHTML = ElementBuilder.templateForComments(film);
+          console.log("что передаем в templateForComments: ", provider.getFilm(film.id));
+          commentsList.innerHTML = ElementBuilder.templateForComments(provider.getFilm(film.id));
           setDetailedCardCommentsCount(comments.length);
           textInput.value = ``;
           textInput.disabled = false;
         })
-        .catch(() => {
+        .catch((error) => {
+          console.log(error);
           textInput.style.border = `5px solid red`;
           shake(textInput);
           textInput.disabled = false;
         });
+
+      // Provider.get().updateFilm({id: film.id, data: film.toRAW()})// //network -> provider
+      //   .then(() => {
+      //     storage.addComment(film.id, newComment);
+      //     const comments = storage.getFilm(film.id).comments;
+      //     document.querySelector(`.film-details__add-emoji`).checked = false;
+      //     commentsList.innerHTML = ElementBuilder.templateForComments(film);
+      //     setDetailedCardCommentsCount(comments.length);
+      //     textInput.value = ``;
+      //     textInput.disabled = false;
+      //   })
+      //   .catch(() => {
+      //     textInput.style.border = `5px solid red`;
+      //     shake(textInput);
+      //     textInput.disabled = false;
+      //   });
     }
   };
 }

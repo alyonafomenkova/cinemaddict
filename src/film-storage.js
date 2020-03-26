@@ -40,16 +40,25 @@ class FilmStorage {
 
     try {
       return JSON.parse(items);
-    } catch (e) {
-      console.error(`Error parse items. Error: ${e}. Items: ${items}`);
+    } catch (error) {
+      console.error(`Error parse items. Error: ${error}. Items: ${items}`);
       return emptyItems;
     }
   }
 
-  getFilms() {
-    const filmsArray = Array.from(this._filmsMap.values());
-    return filmsArray;
-  }
+  //
+  // getFilm(filmId) {
+  //   const films = this.getFilms();
+  //   console.log("films: ", films);
+  //   console.log("film: ", films[filmId]);
+  //   return films[filmId];
+  // }
+  //
+
+  // getFilms() {
+  //   const filmsArray = Array.from(this._filmsMap.values());
+  //   return filmsArray;
+  // }
 
   // addFilms(films) {
   //   films.forEach((film) => {
@@ -59,29 +68,29 @@ class FilmStorage {
   //   console.log(`Films in map: `, this._filmsMap);
   // }
 
-  notifyFilmCommentAdded(filmId, comment) {
-    this._listeners.forEach((listener) => {
-      const evt = {
-        type: ProviderEventType.COMMENT_ADDED,
-        filmId,
-        comment
-      };
-      listener(evt);
-    });
-  }
-
-  addComment(filmId, comment) {
-    let film = this._filmsMap.get(filmId);
-
-    if (film) {
-      film.comments.push(comment);
-      this._filmsMap.set(filmId, film);
-      this.notifyFilmCommentAdded(filmId, comment);
-      console.log(`Comment has been updated for film with ID = ${filmId}`);
-    } else {
-      throw new Error(`Film with ID ${filmId} not found`);
-    }
-  }
+  // notifyFilmCommentAdded(filmId, comment) {
+  //   this._listeners.forEach((listener) => {
+  //     const evt = {
+  //       type: ProviderEventType.COMMENT_ADDED,
+  //       filmId,
+  //       comment
+  //     };
+  //     listener(evt);
+  //   });
+  // }
+  //
+  // addComment(filmId, comment) {
+  //   let film = this._filmsMap.get(filmId);
+  //
+  //   if (film) {
+  //     film.comments.push(comment);
+  //     this._filmsMap.set(filmId, film);
+  //     this.notifyFilmCommentAdded(filmId, comment);
+  //     console.log(`Comment has been updated for film with ID = ${filmId}`);
+  //   } else {
+  //     throw new Error(`Film with ID ${filmId} not found`);
+  //   }
+  // }
 
   notifyWatchlistChange(filmId, isOnWatchlist) {
     this._listeners.forEach((listener) => {
