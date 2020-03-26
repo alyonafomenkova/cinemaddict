@@ -2,9 +2,8 @@ const KeyCode = {
   ENTER: 13
 };
 
-const FilmStorageEventType = {
+const ProviderEventType = {
   COMMENT_ADDED: `comment_added`,
-  USER_RATING_CHANGED: `user_rating_changed`,
   WATCHLIST_CHANGED: `watchlist_changed`,
   WATCHED_CHANGED: `watched_changed`,
   FAVORITE_CHANGED: `favorite_changed`
@@ -17,4 +16,4 @@ const Message = {
   SEARCH: `Unable to find ani movies on your request`,
 };
 
-export {KeyCode, FilmStorageEventType, Message};
+export {KeyCode, ProviderEventType, Message};

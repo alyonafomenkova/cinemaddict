@@ -1,8 +1,8 @@
-import {FilmStorageEventType, KeyCode} from "./constants";
+import {ProviderEventType, KeyCode} from "./constants";
 import {FilmStorage} from "./film-storage";
+import {Provider} from "./provider.js";
 import {ElementBuilder} from './element-builder.js';
 import {network} from './main.js';
-import {provider} from './main.js';//
 import moment from 'moment';
 
 const setDetailedCardCommentsCount = (count) => {
@@ -38,7 +38,8 @@ function addComment(film) {
       textInput.disabled = true;
       textInput.style.border = `none`;
 
-      provider.updateFilm({id: film.id, data: film.toRAW()})////network -> provider
+      // provider.updateFilm({id: film.id, data: film.toRAW()})////network -> provider
+      Provider.get().updateFilm({id: film.id, data: film.toRAW()})// //network -> provider
         .then(() => {
           storage.addComment(film.id, newComment);
           const comments = storage.getFilm(film.id).comments;
@@ -90,11 +91,10 @@ function changeRating(film, detailedFilmComponent) {
     userRatingForm.style.opacity = `0.5`;
     userRatingForm.style.border = `none`;
 
-    network.updateFilm({id: film.id, data: film.toRAW()})
+    Provider.get().updateFilm({id: film.id, data: film})
       .then(() => {
         targetButton.checked = true;
         toggleCheckedButton(detailedFilmComponent, targetButton);
-        FilmStorage.get().changeUserRating(film.id, targetButton.textContent);
         detailedFilmComponent.querySelector(`.film-details__user-rating span`).innerHTML = targetButton.textContent;
         userRatingForm.style.opacity = `1`;
         userRatingForm.style.pointerEvents = `auto`;
@@ -130,20 +130,20 @@ function changeFavorite(film) {
 }
 
 const observeFilmStorageSmallFilm = (evt, film, detailedFilmComponent) => {
-  if (evt.type === FilmStorageEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
-    const status = FilmStorage.get().getFilm(film.id).isOnWatchlist;
+  if (evt.type === ProviderEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
+    const status = Provider.get().getFilm(film.id).isOnWatchlist;
     const watchlistInput = detailedFilmComponent.querySelector(`#addwatchlist`);
     updateInputControl(status, watchlistInput);
   }
 
-  if (evt.type === FilmStorageEventType.WATCHED_CHANGED && evt.filmId === film.id) {
-    const status = FilmStorage.get().getFilm(film.id).isWatched;
+  if (evt.type === ProviderEventType.WATCHED_CHANGED && evt.filmId === film.id) {
+    const status = Provider.get().getFilm(film.id).isWatched;
     const watchedInput = detailedFilmComponent.querySelector(`#watched`);
     updateInputControl(status, watchedInput);
   }
 
-  if (evt.type === FilmStorageEventType.FAVORITE_CHANGED && evt.filmId === film.id) {
-    const status = FilmStorage.get().getFilm(film.id).isFavorite;
+  if (evt.type === ProviderEventType.FAVORITE_CHANGED && evt.filmId === film.id) {
+    const status = Provider.get().getFilm(film.id).isFavorite;
     const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
     updateInputControl(status, favoriteInput);
   }

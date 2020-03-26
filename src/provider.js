@@ -1,5 +1,8 @@
 import {Adapter} from "./adapter";
 import {objectToArray} from "./util.js";
+import {network} from "./main";
+import {storage} from "./main";
+import {ProviderEventType} from "./constants";
 
 const Provider = class {
   constructor({network, storage, generateId}) {
@@ -7,7 +10,34 @@ const Provider = class {
     this._storage = storage;
     this._generateId = generateId;
     this._needSync = false;
+    this._listeners = [];
+    this.addListener = this.addListener.bind(this);
   }
+
+  static get() {
+    if (!this._instance) {
+      console.log(`Creating Provider singleton instance`);
+      this._instance = new Provider({network, storage, generateId: () => String(Date.now())});
+    }
+    return this._instance;
+  }
+
+  addListener(listener) {
+    this._listeners.push(listener);
+    console.log(`[PROVIDER] Total ${this._listeners.length} listeners`);
+  }
+
+  //
+  // getFilm(filmId) {
+  //   let film = this._storage.getItem(filmId);
+  //   console.log("getFilm film: ", film);
+  //
+  //   if (film) {
+  //     return film;
+  //   } else {
+  //     throw new Error(`Film with ID ${filmId} not found`);
+  //   }
+  // }
 
   getFilms() {
     if (this._isOnline()) {
@@ -21,11 +51,10 @@ const Provider = class {
     } else {
       const rawFilmsMap = this._storage.getAll();
       const rawFilms = objectToArray(rawFilmsMap);
-      console.log("[PROVIDER] getFilm rawFilms: ", rawFilms);
-      //const films = Adapter.parseFilms(rawFilms);
-      //console.log("[PROVIDER] getFilm films: ", films);
-      //return Promise.resolve(films);
-      return Promise.resolve(rawFilms);
+      console.log("[PROVIDER] getFilms rawFilms: ", rawFilms);
+      const films = Adapter.parseFilms(rawFilms);
+      console.log("[PROVIDER] getFilm films: ", films);
+      return Promise.resolve(films);
     }
   }
 
@@ -45,6 +74,8 @@ const Provider = class {
   }
 
   updateFilm({id, data}) {
+    console.log("[PROVIDER updateFilm ID: ]", id);
+    console.log("[PROVIDER updateFilm DATA: ]", data);
     return this._network.updateFilm({id, data})
       .then((film) => {
         this._storage.setItem({key: film.id, item: film.toRAW()});
@@ -66,6 +97,7 @@ const Provider = class {
   }
 
   syncFilms() {
+    console.log("[PROVIDER] syncFilms objectToArray(this._storage.getAll()", objectToArray(this._storage.getAll()));
     return this._network.syncFilms({films: objectToArray(this._storage.getAll())});
   }
 

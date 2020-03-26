@@ -2,37 +2,40 @@ import {CountOfFilms, generateFilms} from './data.js';
 import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
 import {FILTERS, filtersList, renderFilters, changeClassForActiveFilter, filterFilms} from './filter.js';
 import {FilmStorage} from './film-storage.js';
+import {Network} from './network';
 import {ElementBuilder} from './element-builder.js';
 import {Provider} from './provider.js';
 import {Statistics} from './statistics/statistics.js';
 import {hideStatistic} from './statistics/statistics-setup.js';
-import {KeyCode, FilmStorageEventType} from './constants';
+import {KeyCode, ProviderEventType} from './constants';
 import {filmComponent, Group, createFilmComponent, observeFilmStorageDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
 import {setDetailedCardCommentsCount, changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm} from './detailed-film';
 import moment from "moment";
 
 const FILMS_PER_LOAD = 5;
+const AUTHORIZATION = `Basic dXNlckBwYXNzdffyZAo=${Math.random()}`;
+const END_POINT = `https://es8-demo-srv.appspot.com/moowle`;
+const FILMS_STORE_KEY = `films-store-key`;
 const filmsContainers = document.querySelectorAll(`.films-list__container`);
 const commonFilmsContainer = filmsContainers[0];
 const topRatedFilmsContainer = filmsContainers[1];
 const mostCommentedFilmsContainer = filmsContainers[2];
 
-// /// SERVER //////////////
-import {Network} from './network';
-const AUTHORIZATION = `Basic dXNlckBwYXNzd35yZAo=${Math.random()}`;
-const END_POINT = `https://es8-demo-srv.appspot.com/moowle`;
 export const network = new Network({endPoint: END_POINT, authorization: AUTHORIZATION});
-const storage = FilmStorage.get();
-export const provider = new Provider({network, storage, generateId: () => String(Date.now())});
+export const storage = new FilmStorage({key: FILMS_STORE_KEY, storage: localStorage});
 
-window.addEventListener(`offline`, () => document.title = `${document.title}[OFFLINE]`);
+window.addEventListener(`offline`, () => {
+  console.log("offline document.title: ", document.title);
+  document.title = `${document.title}[OFFLINE]`;
+});
 window.addEventListener(`online`, () => {
   document.title = document.title.split(`[OFFLINE]`)[0];
-  provider.syncFilms();
+  Provider.get().syncFilms(); // bad request
 });
 
 const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
+  console.log("[renderFilms] filmsArray: ", filmsArray);
 
   filmsArray.map((film) => (film.id)).forEach((filmId) => {
     const overlay = ElementBuilder.createOverlay();
@@ -57,9 +60,7 @@ const renderFilms = (container, filmsArray, group) => {
     };
 
     const onSmallFilmClick = () => {
-      //const film = FilmStorage.get().getFilm(filmId);
       const film = allFilms.find((x) => x.id == filmId);
-      console.log("[onSmallFilmClick] film: ", film);//
       const emoji = detailedFilmComponent.querySelector(`.film-details__emoji-list`);
       const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
       const ratingArea = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
@@ -102,7 +103,7 @@ const renderFilms = (container, filmsArray, group) => {
     changeFavoriteListener = changeFavoriteOnSmallFilm(film);
     container.appendChild(filmComponent);
 
-    FilmStorage.get().addListener((evt) => {
+    Provider.get().addListener((evt) => {
       observeFilmStorageDetailedFilm(evt, film, filmComponent);
       observeFilmStorageSmallFilm(evt, film, detailedFilmComponent);
     });
@@ -121,7 +122,6 @@ statsBtn.addEventListener(`click`, showStatistic);
 
 // /// SERVER /////
 
-const FILMS_STEP = 5;
 
 const filmsLoader = document.querySelector(`.films-list__show-more`);
 const messageContainer = document.querySelector(`.films-list__title`);
@@ -148,15 +148,15 @@ const getCommentedFilms = (films) => {
 
 showLoadingMessage(Message.LOADING);
 
-provider.getFilms()
+Provider.get().getFilms()
   .then((films) => {
     console.log(`Фильмы с сервера: `, films);
     hideLoadingMessage();
     allFilms = films;
-    let result = loadMoreFilms(FILMS_STEP);
+    let result = loadMoreFilms(FILMS_PER_LOAD);
     console.log("result: ", result);
     initFilters(films);
-    return result;//
+    //return result;//
   })
   .catch(() => {
     showLoadingMessage(Message.ERROR);

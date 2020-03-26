@@ -1,6 +1,4 @@
-import {FilmStorageEventType} from "./constants";
-
-const FILMS_STORE_KEY = `films-store-key`;
+import {ProviderEventType} from "./constants";
 
 class FilmStorage {
 
@@ -8,19 +6,10 @@ class FilmStorage {
     //this._filmsMap = new Map();
     this._storeKey = key; // имя ячейки в localStorage в которую он будет записывать данные
     this._storage = storage;
-    this._listeners = [];
-    this.addListener = this.addListener.bind(this);
+    // this._listeners = [];
+    // this.addListener = this.addListener.bind(this);
   }
 
-  static get() {
-    if (!this._instance) {
-      console.log(`Creating FilmStorage singleton instance`);
-      this._instance = new FilmStorage({key: FILMS_STORE_KEY, storage: localStorage});
-    }
-    return this._instance;
-  }
-
-  //
   setItem({key, item}) {
     const items = this.getAll();
     items[key] = item;
@@ -30,6 +19,7 @@ class FilmStorage {
 
   getItem({key}) {
     const items = this.getAll();
+    console.log("[STPRAGE getItem items: ]", items);
     return items[key];
   }
 
@@ -55,46 +45,24 @@ class FilmStorage {
       return emptyItems;
     }
   }
-  //
-
-  // getFilm(filmId) {
-  //   let film = this._filmsMap.get(filmId);
-  //
-  //   if (film) {
-  //     return film;
-  //   } else {
-  //     throw new Error(`Film with ID ${filmId} not found`);
-  //   }
-  //
-  //   /*
-  //     const rawTasksMap = this._store.getAll();
-  //     const rawTasks = objectToArray(rawTasksMap);
-  //     const tasks = ModelTask.parseTasks(rawTasks);
-  //   */
-  // }
 
   getFilms() {
     const filmsArray = Array.from(this._filmsMap.values());
     return filmsArray;
   }
 
-  addListener(listener) {
-    this._listeners.push(listener);
-    console.log(`[STORAGE] Total ${this._listeners.length} listeners`);
-  }
-
-  addFilms(films) {
-    films.forEach((film) => {
-      this._filmsMap.set(film.id, film);
-    });
-    console.log(`Add more ${films.length} films. Total: ${this._filmsMap.size} films.`);
-    console.log(`Films in map: `, this._filmsMap);
-  }
+  // addFilms(films) {
+  //   films.forEach((film) => {
+  //     this._filmsMap.set(film.id, film);
+  //   });
+  //   console.log(`Add more ${films.length} films. Total: ${this._filmsMap.size} films.`);
+  //   console.log(`Films in map: `, this._filmsMap);
+  // }
 
   notifyFilmCommentAdded(filmId, comment) {
     this._listeners.forEach((listener) => {
       const evt = {
-        type: FilmStorageEventType.COMMENT_ADDED,
+        type: ProviderEventType.COMMENT_ADDED,
         filmId,
         comment
       };
@@ -115,33 +83,10 @@ class FilmStorage {
     }
   }
 
-  notifyUserRatingChange(filmId, userRating) {
-    this._listeners.forEach((listener) => {
-      const evt = {
-        type: FilmStorageEventType.USER_RATING_CHANGED,
-        filmId,
-        userRating
-      };
-      listener(evt);
-    });
-  }
-
-  changeUserRating(filmId, userRating) {
-    let film = this._filmsMap.get(filmId);
-
-    if (film) {
-      this._filmsMap.set(filmId, film);
-      this.notifyUserRatingChange(filmId, userRating);
-      console.log(`film with ID = ${filmId}`);
-    } else {
-      throw new Error(`Film with ID ${filmId} not found`);
-    }
-  }
-
   notifyWatchlistChange(filmId, isOnWatchlist) {
     this._listeners.forEach((listener) => {
       const evt = {
-        type: FilmStorageEventType.WATCHLIST_CHANGED,
+        type: ProviderEventType.WATCHLIST_CHANGED,
         filmId,
         isOnWatchlist
       };
@@ -165,7 +110,7 @@ class FilmStorage {
   notifyWatchedChange(filmId, isWatched) {
     this._listeners.forEach((listener) => {
       const evt = {
-        type: FilmStorageEventType.WATCHED_CHANGED,
+        type: ProviderEventType.WATCHED_CHANGED,
         filmId,
         isWatched
       };
@@ -189,7 +134,7 @@ class FilmStorage {
   notifyFavoriteChange(filmId, isFavorite) {
     this._listeners.forEach((listener) => {
       const evt = {
-        type: FilmStorageEventType.FAVORITE_CHANGED,
+        type: ProviderEventType.FAVORITE_CHANGED,
         filmId,
         isFavorite
       };

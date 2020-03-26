@@ -71,16 +71,18 @@ class Network {
 
     return fetch(`${this._endPoint}/${url}`, {method, body, headers})
       .then(checkStatus)
-      .catch((err) => {
-        console.error(`fetch error: ${err}`);
-        throw err;
+      .catch((error) => {
+        // eslint-disable-next-line
+        console.error(`fetch error: ${error}`);
+        throw error;
       });
   }
 
   syncFilms(films) {
+    console.log("[NETWORK] syncFilms films: ", films);
     return this._load({
       url: `movies/sync`,
-      method: `POST`,
+      method: Method.POST,
       body: JSON.stringify(films),
       headers: new Headers({'Content-Type': `application/json`})
     })

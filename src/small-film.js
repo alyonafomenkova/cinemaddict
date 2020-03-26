@@ -1,5 +1,6 @@
-import {FilmStorageEventType} from "./constants";
-import {FilmStorage} from "./film-storage";
+import {ProviderEventType} from "./constants";
+import {FilmStorage} from "./film-storage";//
+import {Provider} from "./provider.js";
 import {ElementBuilder} from "./element-builder";
 
 export const Group = {
@@ -64,25 +65,25 @@ const updateBtnStatus = (status, btn) => {
 };
 
 export const observeFilmStorageDetailedFilm = (evt, film, filmComponent) => {
-  if (evt.type === FilmStorageEventType.COMMENT_ADDED && evt.filmId === film.id) {
-    const count = FilmStorage.get().getFilm(film.id).comments.length;
+  if (evt.type === ProviderEventType.COMMENT_ADDED && evt.filmId === film.id) {
+    const count = Provider.get().getFilm(film.id).comments.length;
     setSmallCardCommentsCount(filmComponent, count);
   }
 
-  if (evt.type === FilmStorageEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
-    const status = FilmStorage.get().getFilm(film.id).isOnWatchlist;
+  if (evt.type === ProviderEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
+    const status = Provider.get().getFilm(film.id).isOnWatchlist;
     const watchlistBtn = filmComponent.querySelector(`.film-card__controls-item--add-to-watchlist`);
     updateBtnStatus(status, watchlistBtn);
   }
 
-  if (evt.type === FilmStorageEventType.WATCHED_CHANGED && evt.filmId === film.id) {
-    const status = FilmStorage.get().getFilm(film.id).isWatched;
+  if (evt.type === ProviderEventType.WATCHED_CHANGED && evt.filmId === film.id) {
+    const status = Provider.get().getFilm(film.id).isWatched;
     const watchedBtn = filmComponent.querySelector(`.film-card__controls-item--mark-as-watched`);
     updateBtnStatus(status, watchedBtn);
   }
 
-  if (evt.type === FilmStorageEventType.FAVORITE_CHANGED && evt.filmId === film.id) {
-    const status = FilmStorage.get().getFilm(film.id).isFavorite;
+  if (evt.type === ProviderEventType.FAVORITE_CHANGED && evt.filmId === film.id) {
+    const status = Provider.get().getFilm(film.id).isFavorite;
     const favoriteBtn = filmComponent.querySelector(`.film-card__controls-item--favorite`);
     updateBtnStatus(status, favoriteBtn);
   }
