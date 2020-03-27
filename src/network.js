@@ -59,7 +59,12 @@ class Network {
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then(toJSON)
-      .then(Adapter.parseFilm);
+      .then(Adapter.parseFilm)
+      .catch((error) => {
+        // eslint-disable-next-line
+        console.error(`fetch error: ${error}`);
+        throw error;
+      });
   }
 
   deleteFilm({id}) {

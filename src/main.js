@@ -69,7 +69,7 @@ const renderFilms = (container, filmsArray, group) => {
       const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
       body.appendChild(overlay);
       body.appendChild(detailedFilmComponent);
-      setDetailedCardCommentsCount(film.comments.length);
+      //setDetailedCardCommentsCount(film.comments.length);
 
       changeEmojiListener = changeEmoji(detailedFilmComponent);
       commentAddListener = addComment(film);

@@ -52,20 +52,23 @@ const Provider = class {
   }
 
   addComment(filmId, comment) {
-    console.log("[PROVIDER addComment filmId: ]", filmId);
-    console.log("[PROVIDER addComment comment: ]", comment);
     let film = this.getFilm(filmId);
 
     if (film) {
       film.comments.push(comment);
-      this._storage.setItem({key: filmId, item: film});
-      this.notifyFilmCommentAdded(filmId, comment);
-      console.log(`Comment has been updated for film with ID = ${filmId}`);
+      return this.updateFilm({id: film.id, data: film})
+        .then(() => {
+          this.notifyFilmCommentAdded(filmId, comment);
+          console.log(`Comment has been updated for film with ID = ${filmId}`);
+          return film;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     } else {
       throw new Error(`Film with ID ${filmId} not found`);
     }
   }
-  //
 
   getFilm(filmId) {
     const films = objectToArray(this._storage.getAll());
@@ -107,13 +110,18 @@ const Provider = class {
   }
 
   updateFilm({id, data}) {
-    console.log("[PROVIDER updateFilm ID: ]", id);
-    console.log("[PROVIDER updateFilm DATA: ]", data);
-    return this._network.updateFilm({id, data})
-      .then((film) => {
-        this._storage.setItem({key: film.id, item: film.toRAW()});
-        return film;
-      });
+    if (this._isOnline()) {
+      return this._network.updateFilm({id, data})
+        .then((film) => {
+          this._storage.setItem({key: film.id, item: film.toRAW()});
+          return film;
+        });
+    } else {
+      const film = data;
+      this._needSync = true;
+      this._storage.setItem({key: film.id, item: film});
+      return Promise.resolve(Adapter.parseFilm(film));
+    }
   }
 
   deleteFilm({id}) {
