@@ -69,29 +69,29 @@ class FilmStorage {
   //   console.log(`Films in map: `, this._filmsMap);
   // }
 
-  notifyWatchlistChange(filmId, isOnWatchlist) {
-    this._listeners.forEach((listener) => {
-      const evt = {
-        type: ProviderEventType.WATCHLIST_CHANGED,
-        filmId,
-        isOnWatchlist
-      };
-      listener(evt);
-    });
-  }
-
-  changeWatchlist(filmId, isOnWatchlist) {
-    let film = this._filmsMap.get(filmId);
-
-    if (film) {
-      film.isOnWatchlist = !film.isOnWatchlist;
-      this._filmsMap.set(filmId, film);
-      this.notifyWatchlistChange(filmId, isOnWatchlist);
-      console.log(`film with ID = ${filmId}`);
-    } else {
-      throw new Error(`Film with ID ${filmId} not found`);
-    }
-  }
+  // notifyWatchlistChange(filmId, isOnWatchlist) {
+  //   this._listeners.forEach((listener) => {
+  //     const evt = {
+  //       type: ProviderEventType.WATCHLIST_CHANGED,
+  //       filmId,
+  //       isOnWatchlist
+  //     };
+  //     listener(evt);
+  //   });
+  // }
+  //
+  // changeWatchlist(filmId, isOnWatchlist) {
+  //   let film = this._filmsMap.get(filmId);
+  //
+  //   if (film) {
+  //     film.isOnWatchlist = !film.isOnWatchlist;
+  //     this._filmsMap.set(filmId, film);
+  //     this.notifyWatchlistChange(filmId, isOnWatchlist);
+  //     console.log(`film with ID = ${filmId}`);
+  //   } else {
+  //     throw new Error(`Film with ID ${filmId} not found`);
+  //   }
+  // }
 
   notifyWatchedChange(filmId, isWatched) {
     this._listeners.forEach((listener) => {

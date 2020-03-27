@@ -27,19 +27,67 @@ const Provider = class {
     console.log(`[PROVIDER] Total ${this._listeners.length} listeners`);
   }
 
-  //
-  // getFilm(filmId) {
-  //   let film = this._storage.getItem(filmId);
-  //   console.log("getFilm film: ", film);
-  //
-  //   if (film) {
-  //     return film;
-  //   } else {
-  //     throw new Error(`Film with ID ${filmId} not found`);
-  //   }
-  // }
+  notifyWatchlistChange(filmId, isOnWatchlist) {
+    this._listeners.forEach((listener) => {
+      const evt = {
+        type: ProviderEventType.WATCHLIST_CHANGED,
+        filmId,
+        isOnWatchlist
+      };
+      listener(evt);
+    });
+  }
 
-  //
+  changeWatchlist(filmId, isOnWatchlist) {
+    let film = this.getFilm(filmId);
+    console.log("в провайдер пришло значение isOnWatchlist: ", isOnWatchlist);
+
+    if (film) {
+      film.isOnWatchlist = !film.isOnWatchlist;
+      return this.updateFilm({id: film.id, data: film})
+        .then(() => {
+          this.notifyWatchlistChange(filmId, film.isOnWatchlist);
+          console.log(`Watchlist has been changed for film with ID = ${filmId}`);
+          console.log("Провайдер возвращает film.isOnWatchlist: ", film.isOnWatchlist);
+          return film;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      throw new Error(`Film with ID ${filmId} not found`);
+    }
+  }
+
+  notifyUserRatingChange(filmId, userRating) {
+    this._listeners.forEach((listener) => {
+      const evt = {
+        type: ProviderEventType.USER_RATING_CHANGED,
+        filmId,
+        userRating
+      };
+      listener(evt);
+    });
+  }
+
+  changeUserRating(filmId, userRating) {
+    let film = this.getFilm(filmId);
+
+    if (film) {
+      return this.updateFilm({id: film.id, data: film})
+        .then(() => {
+          this.notifyUserRatingChange(filmId, userRating);
+          console.log(`Rating has been updated for film with ID = ${filmId}`);
+          return film;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      throw new Error(`Film with ID ${filmId} not found`);
+    }
+  }
+
   notifyFilmCommentAdded(filmId, comment) {
     this._listeners.forEach((listener) => {
       const evt = {
@@ -71,7 +119,7 @@ const Provider = class {
   }
 
   getFilm(filmId) {
-    const films = objectToArray(this._storage.getAll());
+    const films = Adapter.parseFilms(objectToArray(this._storage.getAll()));
     return films[filmId];
   }
 

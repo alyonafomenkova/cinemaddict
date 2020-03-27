@@ -86,13 +86,14 @@ function changeRating(film, detailedFilmComponent) {
   return function () {
     event.preventDefault();
     const targetButton = event.target;
+    const userRating = targetButton.textContent;
     const userRatingForm = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
 
     userRatingForm.style.pointerEvents = `none`;
     userRatingForm.style.opacity = `0.5`;
     userRatingForm.style.border = `none`;
 
-    Provider.get().updateFilm({id: film.id, data: film})
+    Provider.get().changeUserRating(film.id, userRating)
       .then(() => {
         targetButton.checked = true;
         toggleCheckedButton(detailedFilmComponent, targetButton);
@@ -100,7 +101,8 @@ function changeRating(film, detailedFilmComponent) {
         userRatingForm.style.opacity = `1`;
         userRatingForm.style.pointerEvents = `auto`;
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log(error);
         userRatingForm.style.border = `1px solid red`;
         shake(userRatingForm);
         userRatingForm.style.opacity = `1`;
@@ -111,8 +113,8 @@ function changeRating(film, detailedFilmComponent) {
 
 function changeWatchlist(film) {
   return function () {
-    const storage = FilmStorage.get();
-    storage.changeWatchlist(film.id, !film.isOnWatchlist);
+    console.log("что передаём в провайдер из DET", !film.isOnWatchlist);
+    Provider.get().changeWatchlist(film.id, !film.isOnWatchlist);
   };
 }
 
@@ -132,8 +134,11 @@ function changeFavorite(film) {
 
 const observeFilmStorageSmallFilm = (evt, film, detailedFilmComponent) => {
   if (evt.type === ProviderEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
-    const status = Provider.get().getFilm(film.id).isOnWatchlist;
+    console.log("[DET] observeFilmStorageSmallFilm: ");
+    const status = evt.isOnWatchlist;
+    console.log("[DET] status: ", status);
     const watchlistInput = detailedFilmComponent.querySelector(`#addwatchlist`);
+    console.log("[DET] watchlistInput: ", watchlistInput);
     updateInputControl(status, watchlistInput);
   }
 

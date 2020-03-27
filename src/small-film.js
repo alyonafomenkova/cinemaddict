@@ -10,8 +10,8 @@ export const setSmallCardCommentsCount = (film, count) => {
 export function changeWatchlistOnSmallFilm(film) {
   return function () {
     event.preventDefault();
-    const storage = FilmStorage.get();
-    storage.changeWatchlist(film.id, !film.isOnWatchlist);
+    console.log("что передаём в провайдер из SMALL", !film.isOnWatchlist);
+    Provider.get().changeWatchlist(film.id, !film.isOnWatchlist);
   };
 }
 
@@ -39,15 +39,19 @@ const updateBtnStatus = (status, btn) => {
   }
 };
 
-export const observeFilmStorageDetailedFilm = (evt, film, filmComponent) => {// filmComponent удалить
+export const observeFilmStorageDetailedFilm = (evt, film, filmComponent) => { // filmComponent удалить
   if (evt.type === ProviderEventType.COMMENT_ADDED && evt.filmId === film.id) {
     const count = Provider.get().getFilm(film.id).comments.length;
+    console.log("[SMALL] count: ", count);
     setSmallCardCommentsCount(film, count);
   }
 
   if (evt.type === ProviderEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
-    const status = Provider.get().getFilm(film.id).isOnWatchlist;
+    console.log("[SMALL] observeFilmStorageDetailedFilm: ");
+    const status = evt.isOnWatchlist;
+    console.log("[SMALL] status: ", status);
     const watchlistBtn = filmComponent.querySelector(`.film-card__controls-item--add-to-watchlist`);// filmComponent удалить
+    console.log("[SMALL] watchlistBtn: ", watchlistBtn);
     updateBtnStatus(status, watchlistBtn);
   }
 

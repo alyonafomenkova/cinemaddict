@@ -10,6 +10,7 @@ export const Group = {
 
 export const ProviderEventType = {
   COMMENT_ADDED: `comment_added`,
+  USER_RATING_CHANGED: `user_rating_changed`,
   WATCHLIST_CHANGED: `watchlist_changed`,
   WATCHED_CHANGED: `watched_changed`,
   FAVORITE_CHANGED: `favorite_changed`
