@@ -33,6 +33,8 @@ function addComment(film) {
     if (event.ctrlKey && event.keyCode === KeyCode.ENTER && textInput.value) {
       const provider = Provider.get();
       const newComment = {};
+      const emoji = document.querySelector(`.film-details__add-emoji`);
+      console.log("emoji: ", emoji);
       newComment.comment = textInput.value;
       newComment.author = `Ivan Inanov`;
       newComment.emotion = document.querySelector(`.film-details__emoji-item:checked`).value;
@@ -41,7 +43,7 @@ function addComment(film) {
       textInput.style.border = `none`;
       provider.addComment(film.id, newComment)
         .then((film) => {
-          document.querySelector(`.film-details__add-emoji`).checked = false;
+          emoji.checked = false;
           commentsList.innerHTML = ElementBuilder.templateForComments(film);
           setDetailedCardCommentsCount(film.comments.length);
           textInput.value = ``;

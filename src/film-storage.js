@@ -41,6 +41,7 @@ class FilmStorage {
     try {
       return JSON.parse(items);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`Error parse items. Error: ${error}. Items: ${items}`);
       return emptyItems;
     }
@@ -66,30 +67,6 @@ class FilmStorage {
   //   });
   //   console.log(`Add more ${films.length} films. Total: ${this._filmsMap.size} films.`);
   //   console.log(`Films in map: `, this._filmsMap);
-  // }
-
-  // notifyFilmCommentAdded(filmId, comment) {
-  //   this._listeners.forEach((listener) => {
-  //     const evt = {
-  //       type: ProviderEventType.COMMENT_ADDED,
-  //       filmId,
-  //       comment
-  //     };
-  //     listener(evt);
-  //   });
-  // }
-  //
-  // addComment(filmId, comment) {
-  //   let film = this._filmsMap.get(filmId);
-  //
-  //   if (film) {
-  //     film.comments.push(comment);
-  //     this._filmsMap.set(filmId, film);
-  //     this.notifyFilmCommentAdded(filmId, comment);
-  //     console.log(`Comment has been updated for film with ID = ${filmId}`);
-  //   } else {
-  //     throw new Error(`Film with ID ${filmId} not found`);
-  //   }
   // }
 
   notifyWatchlistChange(filmId, isOnWatchlist) {

@@ -58,9 +58,6 @@ class Adapter {
   }
 
   static parseFilms(data) {
-    console.log("data: ", data);//
-    const adapted = data.map(Adapter.parseFilm);//
-    console.log("adapted: ", adapted);//
     return data.map(Adapter.parseFilm);
   }
 }

@@ -83,8 +83,7 @@ class Network {
       });
   }
 
-  syncFilms(films) {
-    console.log("[NETWORK] syncFilms films: ", films);
+  syncFilms({films}) {
     return this._load({
       url: `movies/sync`,
       method: Method.POST,

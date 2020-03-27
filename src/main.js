@@ -7,9 +7,9 @@ import {ElementBuilder} from './element-builder.js';
 import {Provider} from './provider.js';
 import {Statistics} from './statistics/statistics.js';
 import {hideStatistic} from './statistics/statistics-setup.js';
-import {KeyCode, ProviderEventType} from './constants';
-import {filmComponent, Group, createFilmComponent, observeFilmStorageDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
-import {setDetailedCardCommentsCount, changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm} from './detailed-film';
+import {Group, KeyCode, ProviderEventType} from './constants';
+import {createFilmComponent, observeFilmStorageDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
+import {changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm} from './detailed-film';
 import moment from "moment";
 
 const FILMS_PER_LOAD = 5;
@@ -25,12 +25,11 @@ export const network = new Network({endPoint: END_POINT, authorization: AUTHORIZ
 export const storage = new FilmStorage({key: FILMS_STORE_KEY, storage: localStorage});
 
 window.addEventListener(`offline`, () => {
-  console.log("offline document.title: ", document.title);
   document.title = `${document.title}[OFFLINE]`;
 });
 window.addEventListener(`online`, () => {
   document.title = document.title.split(`[OFFLINE]`)[0];
-  Provider.get().syncFilms(); // bad request
+  Provider.get().syncFilms();
 });
 
 const renderFilms = (container, filmsArray, group) => {
@@ -39,6 +38,7 @@ const renderFilms = (container, filmsArray, group) => {
 
   filmsArray.map((film) => (film.id)).forEach((filmId) => {
     const overlay = ElementBuilder.createOverlay();
+    let filmComponent;
     let commentAddListener = null;
     let changeEmojiListener = null;
     let changeRatingListener = null;
@@ -69,7 +69,6 @@ const renderFilms = (container, filmsArray, group) => {
       const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
       body.appendChild(overlay);
       body.appendChild(detailedFilmComponent);
-      //setDetailedCardCommentsCount(film.comments.length);
 
       changeEmojiListener = changeEmoji(detailedFilmComponent);
       commentAddListener = addComment(film);
@@ -89,7 +88,7 @@ const renderFilms = (container, filmsArray, group) => {
     const film = allFilms.find((x) => x.id == filmId);
 
     if (film) {
-      createFilmComponent(group, film, onSmallFilmClick);
+      filmComponent = ElementBuilder.buildSmallFilmElement(group, film, onSmallFilmClick);
     } else {
       console.error(`Film with ID  ${filmId} not found`);
     }
@@ -156,7 +155,6 @@ Provider.get().getFilms()
     let result = loadMoreFilms(FILMS_PER_LOAD);
     console.log("result: ", result);
     initFilters(films);
-    //return result;//
   })
   .catch(() => {
     showLoadingMessage(Message.ERROR);

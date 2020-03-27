@@ -1,35 +1,10 @@
 import {ProviderEventType} from "./constants";
 import {FilmStorage} from "./film-storage";//
 import {Provider} from "./provider.js";
-import {ElementBuilder} from "./element-builder";
 
-export const Group = {
-  ALL: 0,
-  TOP_RATED: 1,
-  MOST_COMMENTED: 2
-};
-
-export let filmComponent;
-
-export const createFilmComponent = (group, film, onSmallFilmClick) => {
-  switch (group) {
-    case Group.ALL:
-      filmComponent = ElementBuilder.buildSmallFilmElement(film, onSmallFilmClick);
-      break;
-    case Group.TOP_RATED:
-      filmComponent = ElementBuilder.buildExtraSmallFilmElement(film, onSmallFilmClick);
-      break;
-    case Group.MOST_COMMENTED:
-      filmComponent = ElementBuilder.buildExtraSmallFilmElement(film, onSmallFilmClick);
-      break;
-    default:
-      throw new Error(`Unknown group type: ${group}`);
-  }
-};
-
-export const setSmallCardCommentsCount = (count) => {
-  const commentsCountFields = document.querySelectorAll(`.film-card__comments`);
-  commentsCountFields.forEach((field) => field.innerHTML = count + ` comments`);
+export const setSmallCardCommentsCount = (film, count) => {
+  const commentsCountField = document.querySelector(`.film-card__comments`);
+  commentsCountField.innerHTML = count + ` comments`;
 };
 
 export function changeWatchlistOnSmallFilm(film) {
@@ -64,27 +39,27 @@ const updateBtnStatus = (status, btn) => {
   }
 };
 
-export const observeFilmStorageDetailedFilm = (evt, film, filmComponent) => {// filmComponent удалить, т.к. у нас есть top rated и most commented
+export const observeFilmStorageDetailedFilm = (evt, film, filmComponent) => {// filmComponent удалить
   if (evt.type === ProviderEventType.COMMENT_ADDED && evt.filmId === film.id) {
     const count = Provider.get().getFilm(film.id).comments.length;
-    setSmallCardCommentsCount(count);
+    setSmallCardCommentsCount(film, count);
   }
 
   if (evt.type === ProviderEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
     const status = Provider.get().getFilm(film.id).isOnWatchlist;
-    const watchlistBtn = filmComponent.querySelector(`.film-card__controls-item--add-to-watchlist`);// filmComponent удалить, т.к. у нас есть top rated и most commented
+    const watchlistBtn = filmComponent.querySelector(`.film-card__controls-item--add-to-watchlist`);// filmComponent удалить
     updateBtnStatus(status, watchlistBtn);
   }
 
   if (evt.type === ProviderEventType.WATCHED_CHANGED && evt.filmId === film.id) {
     const status = Provider.get().getFilm(film.id).isWatched;
-    const watchedBtn = filmComponent.querySelector(`.film-card__controls-item--mark-as-watched`);// filmComponent удалить, т.к. у нас есть top rated и most commented
+    const watchedBtn = filmComponent.querySelector(`.film-card__controls-item--mark-as-watched`);// filmComponent удалить
     updateBtnStatus(status, watchedBtn);
   }
 
   if (evt.type === ProviderEventType.FAVORITE_CHANGED && evt.filmId === film.id) {
     const status = Provider.get().getFilm(film.id).isFavorite;
-    const favoriteBtn = filmComponent.querySelector(`.film-card__controls-item--favorite`);// filmComponent удалить, т.к. у нас есть top rated и most commented
+    const favoriteBtn = filmComponent.querySelector(`.film-card__controls-item--favorite`);// filmComponent удалить
     updateBtnStatus(status, favoriteBtn);
   }
 };

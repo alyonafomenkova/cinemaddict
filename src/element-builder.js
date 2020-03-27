@@ -1,5 +1,6 @@
 import {createElement, checkExists} from './util.js';
 import {getEmoji} from './detailed-film.js';
+import {Group} from './constants.js';
 import moment from 'moment';
 
 class ElementBuilder {
@@ -232,8 +233,21 @@ class ElementBuilder {
       </a>`.trim();
   }
 
-  static buildSmallFilmElement(film, clickListener) {
-    const template = this.templateForSmallFilm(film);
+  static buildSmallFilmElement(group, film, clickListener) {
+    let template;
+    switch (group) {
+      case Group.ALL:
+        template = this.templateForSmallFilm(film);
+        break;
+      case Group.TOP_RATED:
+        template = this.templateForExtraSmallFilm(film);
+        break;
+      case Group.MOST_COMMENTED:
+        template = this.templateForExtraSmallFilm(film);
+        break;
+      default:
+        throw new Error(`Unknown group type: ${group}`);
+    }
     const element = createElement(template);
     this.setClickListener(element, `.film-card__comments`, clickListener);
     return element;
@@ -243,13 +257,6 @@ class ElementBuilder {
     const template = this.templateForDetailedFilm(film);
     const element = createElement(template);
     this.setClickListener(element, `.film-details__close`, clickListener);
-    return element;
-  }
-
-  static buildExtraSmallFilmElement(film, clickListener) {
-    const template = this.templateForExtraSmallFilm(film);
-    const element = createElement(template);
-    this.setClickListener(element, `.film-card__comments`, clickListener);
     return element;
   }
 
