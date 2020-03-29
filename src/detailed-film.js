@@ -113,8 +113,7 @@ function changeRating(film, detailedFilmComponent) {
 
 function changeWatchlist(film) {
   return function () {
-    console.log("что передаём в провайдер из DET", !film.isOnWatchlist);
-    Provider.get().changeWatchlist(film.id, !film.isOnWatchlist);
+    Provider.get().changeWatchlist(film.id);
   };
 }
 
@@ -134,11 +133,8 @@ function changeFavorite(film) {
 
 const observeFilmStorageSmallFilm = (evt, film, detailedFilmComponent) => {
   if (evt.type === ProviderEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
-    console.log("[DET] observeFilmStorageSmallFilm: ");
     const status = evt.isOnWatchlist;
-    console.log("[DET] status: ", status);
     const watchlistInput = detailedFilmComponent.querySelector(`#addwatchlist`);
-    console.log("[DET] watchlistInput: ", watchlistInput);
     updateInputControl(status, watchlistInput);
   }
 

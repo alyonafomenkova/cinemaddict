@@ -38,12 +38,13 @@ const Provider = class {
     });
   }
 
-  changeWatchlist(filmId, isOnWatchlist) {
+  changeWatchlist(filmId) {
     let film = this.getFilm(filmId);
-    console.log("в провайдер пришло значение isOnWatchlist: ", isOnWatchlist);
+    console.log(`>>>>>>>>>>>> 111: Из storage: ${film.isOnWatchlist}`);
 
     if (film) {
       film.isOnWatchlist = !film.isOnWatchlist;
+      console.log(`>>>>>>>>>>>> 222: Обновили: ${film.isOnWatchlist}`);
       return this.updateFilm({id: film.id, data: film})
         .then(() => {
           this.notifyWatchlistChange(filmId, film.isOnWatchlist);
@@ -161,7 +162,7 @@ const Provider = class {
     if (this._isOnline()) {
       return this._network.updateFilm({id, data})
         .then((film) => {
-          this._storage.setItem({key: film.id, item: film.toRAW()});
+          this._storage.setItem({key: data.id, item: data.toRAW()});
           return film;
         });
     } else {
