@@ -8,8 +8,8 @@ import {Provider} from './provider.js';
 import {Statistics} from './statistics/statistics.js';
 import {hideStatistic} from './statistics/statistics-setup.js';
 import {Group, KeyCode, ProviderEventType} from './constants';
-import {createFilmComponent, observeFilmStorageDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
-import {changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm} from './detailed-film';
+import {createFilmComponent, observeProviderDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
+import {changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeProviderSmallFilm} from './detailed-film';
 import moment from "moment";
 
 const FILMS_PER_LOAD = 5;
@@ -103,8 +103,8 @@ const renderFilms = (container, filmsArray, group) => {
     container.appendChild(filmComponent);
 
     Provider.get().addListener((evt) => {
-      observeFilmStorageDetailedFilm(evt, film, filmComponent);
-      observeFilmStorageSmallFilm(evt, film, detailedFilmComponent);
+      observeProviderDetailedFilm(evt, film, filmComponent);
+      observeProviderSmallFilm(evt, film, detailedFilmComponent);
     });
     watchlistBtn.addEventListener(`click`, changeWatchlistListener);
     watchedBtn.addEventListener(`click`, changeWatchedListener);

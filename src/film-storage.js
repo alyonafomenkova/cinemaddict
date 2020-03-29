@@ -69,77 +69,54 @@ class FilmStorage {
   //   console.log(`Films in map: `, this._filmsMap);
   // }
 
-  // notifyWatchlistChange(filmId, isOnWatchlist) {
+
+  // notifyWatchedChange(filmId, isWatched) {
   //   this._listeners.forEach((listener) => {
   //     const evt = {
-  //       type: ProviderEventType.WATCHLIST_CHANGED,
+  //       type: ProviderEventType.WATCHED_CHANGED,
   //       filmId,
-  //       isOnWatchlist
+  //       isWatched
   //     };
   //     listener(evt);
   //   });
   // }
   //
-  // changeWatchlist(filmId, isOnWatchlist) {
+  // changeWatched(filmId, isWatched) {
   //   let film = this._filmsMap.get(filmId);
   //
   //   if (film) {
-  //     film.isOnWatchlist = !film.isOnWatchlist;
+  //     film.isWatched = !film.isWatched;
   //     this._filmsMap.set(filmId, film);
-  //     this.notifyWatchlistChange(filmId, isOnWatchlist);
+  //     this.notifyWatchedChange(filmId, isWatched);
   //     console.log(`film with ID = ${filmId}`);
   //   } else {
   //     throw new Error(`Film with ID ${filmId} not found`);
   //   }
   // }
 
-  notifyWatchedChange(filmId, isWatched) {
-    this._listeners.forEach((listener) => {
-      const evt = {
-        type: ProviderEventType.WATCHED_CHANGED,
-        filmId,
-        isWatched
-      };
-      listener(evt);
-    });
-  }
-
-  changeWatched(filmId, isWatched) {
-    let film = this._filmsMap.get(filmId);
-
-    if (film) {
-      film.isWatched = !film.isWatched;
-      this._filmsMap.set(filmId, film);
-      this.notifyWatchedChange(filmId, isWatched);
-      console.log(`film with ID = ${filmId}`);
-    } else {
-      throw new Error(`Film with ID ${filmId} not found`);
-    }
-  }
-
-  notifyFavoriteChange(filmId, isFavorite) {
-    this._listeners.forEach((listener) => {
-      const evt = {
-        type: ProviderEventType.FAVORITE_CHANGED,
-        filmId,
-        isFavorite
-      };
-      listener(evt);
-    });
-  }
-
-  changeFavorite(filmId, isFavorite) {
-    let film = this._filmsMap.get(filmId);
-
-    if (film) {
-      film.isFavorite = !film.isFavorite;
-      this._filmsMap.set(filmId, film);
-      this.notifyFavoriteChange(filmId, isFavorite);
-      console.log(`film with ID = ${filmId}`);
-    } else {
-      throw new Error(`Film with ID ${filmId} not found`);
-    }
-  }
+  // notifyFavoriteChange(filmId, isFavorite) {
+  //   this._listeners.forEach((listener) => {
+  //     const evt = {
+  //       type: ProviderEventType.FAVORITE_CHANGED,
+  //       filmId,
+  //       isFavorite
+  //     };
+  //     listener(evt);
+  //   });
+  // }
+  //
+  // changeFavorite(filmId, isFavorite) {
+  //   let film = this._filmsMap.get(filmId);
+  //
+  //   if (film) {
+  //     film.isFavorite = !film.isFavorite;
+  //     this._filmsMap.set(filmId, film);
+  //     this.notifyFavoriteChange(filmId, isFavorite);
+  //     console.log(`film with ID = ${filmId}`);
+  //   } else {
+  //     throw new Error(`Film with ID ${filmId} not found`);
+  //   }
+  // }
 }
 
 export {FilmStorage};

@@ -1,14 +1,10 @@
 import {ProviderEventType, KeyCode} from "./constants";
-import {FilmStorage} from "./film-storage";
 import {Provider} from "./provider.js";
 import {ElementBuilder} from './element-builder.js';
-import {network} from './main.js';
 import moment from 'moment';
-import {Adapter} from "./adapter";
 
 const setDetailedCardCommentsCount = (count) => {
   const commentsCountField = document.querySelector(`.film-details__comments-count`);
-  console.log("setDetailedCardCommentsCount: ", count);
   commentsCountField.innerHTML = count;
 };
 
@@ -34,7 +30,6 @@ function addComment(film) {
       const provider = Provider.get();
       const newComment = {};
       const emoji = document.querySelector(`.film-details__add-emoji`);
-      console.log("emoji: ", emoji);
       newComment.comment = textInput.value;
       newComment.author = `Ivan Inanov`;
       newComment.emotion = document.querySelector(`.film-details__emoji-item:checked`).value;
@@ -119,19 +114,17 @@ function changeWatchlist(film) {
 
 function changeWatched(film) {
   return function () {
-    const storage = FilmStorage.get();
-    storage.changeWatched(film.id, !film.isWatched);
+    Provider.get().changeWatched(film.id);
   };
 }
 
 function changeFavorite(film) {
   return function () {
-    const storage = FilmStorage.get();
-    storage.changeFavorite(film.id, !film.isFavorite);
+    Provider.get().changeFavorite(film.id);
   };
 }
 
-const observeFilmStorageSmallFilm = (evt, film, detailedFilmComponent) => {
+const observeProviderSmallFilm = (evt, film, detailedFilmComponent) => {
   if (evt.type === ProviderEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
     const status = evt.isOnWatchlist;
     const watchlistInput = detailedFilmComponent.querySelector(`#addwatchlist`);
@@ -151,4 +144,4 @@ const observeFilmStorageSmallFilm = (evt, film, detailedFilmComponent) => {
   }
 };
 
-export {setDetailedCardCommentsCount, getEmoji, addComment, changeEmoji, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm};
+export {setDetailedCardCommentsCount, getEmoji, addComment, changeEmoji, changeRating, changeWatchlist, changeWatched, changeFavorite, observeProviderSmallFilm};

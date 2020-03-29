@@ -60,6 +60,64 @@ const Provider = class {
     }
   }
 
+  notifyWatchedChange(filmId, isWatched) {
+    this._listeners.forEach((listener) => {
+      const evt = {
+        type: ProviderEventType.WATCHED_CHANGED,
+        filmId,
+        isWatched
+      };
+      listener(evt);
+    });
+  }
+
+  changeWatched(filmId) {
+    let film = this.getFilm(filmId);
+
+    if (film) {
+      film.isWatched = !film.isWatched;
+      return this.updateFilm({id: film.id, data: film})
+        .then(() => {
+          this.notifyWatchedChange(filmId, film.isWatched);
+          return film;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      throw new Error(`Film with ID ${filmId} not found`);
+    }
+  }
+
+  notifyFavoriteChange(filmId, isFavorite) {
+    this._listeners.forEach((listener) => {
+      const evt = {
+        type: ProviderEventType.FAVORITE_CHANGED,
+        filmId,
+        isFavorite
+      };
+      listener(evt);
+    });
+  }
+
+  changeFavorite(filmId) {
+    let film = this.getFilm(filmId);
+
+    if (film) {
+      film.isFavorite = !film.isFavorite;
+      return this.updateFilm({id: film.id, data: film})
+        .then(() => {
+          this.notifyFavoriteChange(filmId, film.isFavorite);
+          return film;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      throw new Error(`Film with ID ${filmId} not found`);
+    }
+  }
+
   notifyUserRatingChange(filmId, userRating) {
     this._listeners.forEach((listener) => {
       const evt = {
@@ -163,6 +221,7 @@ const Provider = class {
       return this._network.updateFilm({id, data})
         .then((film) => {
           this._storage.setItem({key: data.id, item: data.toRAW()});
+          console.log("ffffffff", film);
           return film;
         });
     } else {
