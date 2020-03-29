@@ -1,33 +1,29 @@
-import {FilmStorageEventType} from "./constants";
-import {FilmStorage} from "./film-storage";
-import {checkExists} from "./util";
+import {ProviderEventType} from "./constants";
+import {Provider} from "./provider.js";
 
-const setSmallCardCommentsCount = (filmComponent, count) => {
-  const commentsCountField = filmComponent.querySelector(`.film-card__comments`);
+export const setSmallCardCommentsCount = (film, count) => {
+  const commentsCountField = document.querySelector(`.film-card__comments`);
   commentsCountField.innerHTML = count + ` comments`;
 };
 
-function changeWatchlistOnSmallFilm(film) {
+export function changeWatchlistOnSmallFilm(film) {
   return function () {
     event.preventDefault();
-    const storage = FilmStorage.get();
-    storage.changeWatchlist(film.id, !film.isOnWatchlist);
+    Provider.get().changeWatchlist(film.id);
   };
 }
 
-function changeWatchedOnSmallFilm(film) {
+export function changeWatchedOnSmallFilm(film) {
   return function () {
     event.preventDefault();
-    const storage = FilmStorage.get();
-    storage.changeWatched(film.id, !film.isWatched);
+    Provider.get().changeWatched(film.id);
   };
 }
 
-function changeFavoriteOnSmallFilm(film) {
+export function changeFavoriteOnSmallFilm(film) {
   return function () {
     event.preventDefault();
-    const storage = FilmStorage.get();
-    storage.changeFavorite(film.id, !film.isFavorite);
+    Provider.get().changeFavorite(film.id);
   };
 }
 
@@ -39,29 +35,27 @@ const updateBtnStatus = (status, btn) => {
   }
 };
 
-const observeFilmStorageDetailedFilm = (evt, film, filmComponent) => {
-  if (evt.type === FilmStorageEventType.COMMENT_ADDED && evt.filmId === film.id) {
-    const count = FilmStorage.get().getFilm(film.id).comments.length;
-    setSmallCardCommentsCount(filmComponent, count);
+export const observeProviderDetailedFilm = (evt, film, filmComponent) => {
+  if (evt.type === ProviderEventType.COMMENT_ADDED && evt.filmId === film.id) {
+    const count = Provider.get().getFilm(film.id).comments.length;
+    setSmallCardCommentsCount(film, count);
   }
 
-  if (evt.type === FilmStorageEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
-    const status = FilmStorage.get().getFilm(film.id).isOnWatchlist;
+  if (evt.type === ProviderEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
+    const status = evt.isOnWatchlist;
     const watchlistBtn = filmComponent.querySelector(`.film-card__controls-item--add-to-watchlist`);
     updateBtnStatus(status, watchlistBtn);
   }
 
-  if (evt.type === FilmStorageEventType.WATCHED_CHANGED && evt.filmId === film.id) {
-    const status = FilmStorage.get().getFilm(film.id).isWatched;
+  if (evt.type === ProviderEventType.WATCHED_CHANGED && evt.filmId === film.id) {
+    const status = Provider.get().getFilm(film.id).isWatched;
     const watchedBtn = filmComponent.querySelector(`.film-card__controls-item--mark-as-watched`);
     updateBtnStatus(status, watchedBtn);
   }
 
-  if (evt.type === FilmStorageEventType.FAVORITE_CHANGED && evt.filmId === film.id) {
-    const status = FilmStorage.get().getFilm(film.id).isFavorite;
+  if (evt.type === ProviderEventType.FAVORITE_CHANGED && evt.filmId === film.id) {
+    const status = Provider.get().getFilm(film.id).isFavorite;
     const favoriteBtn = filmComponent.querySelector(`.film-card__controls-item--favorite`);
     updateBtnStatus(status, favoriteBtn);
   }
 };
-
-export {setSmallCardCommentsCount, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm, observeFilmStorageDetailedFilm};

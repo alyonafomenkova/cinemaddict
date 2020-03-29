@@ -1,5 +1,5 @@
 
-const rank = {
+export const rank = {
   'comedy': `Jim Carrey`,
   'drama': `Julia Roberts`,
   'horror': `Freddy Krueger`,
@@ -11,9 +11,9 @@ const rank = {
   'science': `Doctor Who`
 };
 
-const getRandomNumber = (min, max) => min + Math.floor(Math.random() * (max + 1 - min));
+export const getRandomNumber = (min, max) => min + Math.floor(Math.random() * (max + 1 - min));
 
-const getRandomElement = (array) => {
+export const getRandomElement = (array) => {
   const rand = Math.floor(Math.random() * array.length);
   return array[rand];
 };
@@ -26,30 +26,32 @@ const shuffleArray = (array) => {
   return array;
 };
 
-const getShuffledSubarray = (array, numberOfElements) => {
+export const getShuffledSubarray = (array, numberOfElements) => {
   const shuffledArr = shuffleArray(array);
   return shuffledArr.slice(0, numberOfElements);
 };
 
-const getSubarray = (array, numberOfElements) => {
+export const getSubarray = (array, numberOfElements) => {
   return array.slice(0, numberOfElements);
 };
 
-const createElement = (template) => {
+export const createElement = (template) => {
   const newElement = document.createElement(`div`);
   newElement.innerHTML = template;
   return newElement.firstChild;
 };
 
-const checkExists = (value, message) => {
+export const checkExists = (value, message) => {
   if (value === null || typeof (value) === `undefined`) {
     throw new Error(message);
   }
   return value;
 };
 
-const getRandomDate = (start, end) => {
+export const getRandomDate = (start, end) => {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 };
 
-export {rank, getRandomNumber, getRandomElement, getShuffledSubarray, getSubarray, createElement, checkExists, getRandomDate};
+export const objectToArray = (object) => {
+  return Object.keys(object).map((id) => object[id]);
+};

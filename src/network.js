@@ -59,7 +59,12 @@ class Network {
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then(toJSON)
-      .then(Adapter.parseFilm);
+      .then(Adapter.parseFilm)
+      .catch((error) => {
+        // eslint-disable-next-line
+        console.error(`fetch error: ${error}`);
+        throw error;
+      });
   }
 
   deleteFilm({id}) {
@@ -71,10 +76,21 @@ class Network {
 
     return fetch(`${this._endPoint}/${url}`, {method, body, headers})
       .then(checkStatus)
-      .catch((err) => {
-        console.error(`fetch error: ${err}`);
-        throw err;
+      .catch((error) => {
+        // eslint-disable-next-line
+        console.error(`fetch error: ${error}`);
+        throw error;
       });
+  }
+
+  syncFilms({films}) {
+    return this._load({
+      url: `movies/sync`,
+      method: Method.POST,
+      body: JSON.stringify(films),
+      headers: new Headers({'Content-Type': `application/json`})
+    })
+      .then(toJSON);
   }
 }
 

@@ -2,35 +2,43 @@ import {CountOfFilms, generateFilms} from './data.js';
 import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
 import {FILTERS, filtersList, renderFilters, changeClassForActiveFilter, filterFilms} from './filter.js';
 import {FilmStorage} from './film-storage.js';
+import {Network} from './network';
 import {ElementBuilder} from './element-builder.js';
+import {Provider} from './provider.js';
 import {Statistics} from './statistics/statistics.js';
 import {hideStatistic} from './statistics/statistics-setup.js';
-import {KeyCode, FilmStorageEventType} from './constants';
-import {observeFilmStorageDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
-import {setDetailedCardCommentsCount, changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeFilmStorageSmallFilm} from './detailed-film';
+import {Group, KeyCode, ProviderEventType} from './constants';
+import {createFilmComponent, observeProviderDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
+import {changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeProviderSmallFilm} from './detailed-film';
 import moment from "moment";
 
 const FILMS_PER_LOAD = 5;
+const AUTHORIZATION = `Basic dXNlckBwYXNzdffysAo=${Math.random()}`;
+const END_POINT = `https://es8-demo-srv.appspot.com/moowle`;
+const FILMS_STORE_KEY = `films-store-key`;
 const filmsContainers = document.querySelectorAll(`.films-list__container`);
 const commonFilmsContainer = filmsContainers[0];
 const topRatedFilmsContainer = filmsContainers[1];
 const mostCommentedFilmsContainer = filmsContainers[2];
-const Group = {
-  ALL: 0,
-  TOP_RATED: 1,
-  MOST_COMMENTED: 2
-};
-///// SERVER //////////////
-import {Network} from './network';
-const AUTHORIZATION = `Basic dXNlckBwYXNzd35yZAo=${Math.random()}`;
-const END_POINT = `https://es8-demo-srv.appspot.com/moowle`;
+
 export const network = new Network({endPoint: END_POINT, authorization: AUTHORIZATION});
+export const storage = new FilmStorage({key: FILMS_STORE_KEY, storage: localStorage});
+
+window.addEventListener(`offline`, () => {
+  document.title = `${document.title}[OFFLINE]`;
+});
+window.addEventListener(`online`, () => {
+  document.title = document.title.split(`[OFFLINE]`)[0];
+  Provider.get().syncFilms();
+});
 
 const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
+  console.log("[renderFilms] filmsArray: ", filmsArray);
 
   filmsArray.map((film) => (film.id)).forEach((filmId) => {
     const overlay = ElementBuilder.createOverlay();
+    let filmComponent;
     let commentAddListener = null;
     let changeEmojiListener = null;
     let changeRatingListener = null;
@@ -52,7 +60,7 @@ const renderFilms = (container, filmsArray, group) => {
     };
 
     const onSmallFilmClick = () => {
-      const film = FilmStorage.get().getFilm(filmId);
+      const film = allFilms.find((x) => x.id == filmId);
       const emoji = detailedFilmComponent.querySelector(`.film-details__emoji-list`);
       const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
       const ratingArea = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
@@ -61,7 +69,6 @@ const renderFilms = (container, filmsArray, group) => {
       const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
       body.appendChild(overlay);
       body.appendChild(detailedFilmComponent);
-      setDetailedCardCommentsCount(film.comments.length);
 
       changeEmojiListener = changeEmoji(detailedFilmComponent);
       commentAddListener = addComment(film);
@@ -78,21 +85,12 @@ const renderFilms = (container, filmsArray, group) => {
       favoriteInput.addEventListener(`click`, changeFavoriteListener);
     };
 
-    const film = FilmStorage.get().getFilm(filmId);
-    let filmComponent;
+    const film = allFilms.find((x) => x.id == filmId);
 
-    switch (group) {
-      case Group.ALL:
-        filmComponent = ElementBuilder.buildSmallFilmElement(film, onSmallFilmClick);
-        break;
-      case Group.TOP_RATED:
-        filmComponent = ElementBuilder.buildExtraSmallFilmElement(film, onSmallFilmClick);
-        break;
-      case Group.MOST_COMMENTED:
-        filmComponent = ElementBuilder.buildExtraSmallFilmElement(film, onSmallFilmClick);
-        break;
-      default:
-        throw new Error(`Unknown group type: ${group}`);
+    if (film) {
+      filmComponent = ElementBuilder.buildSmallFilmElement(group, film, onSmallFilmClick);
+    } else {
+      console.error(`Film with ID  ${filmId} not found`);
     }
 
     const detailedFilmComponent = ElementBuilder.buildDetailedFilmElement(film, onDetailedFilmClick);
@@ -104,9 +102,9 @@ const renderFilms = (container, filmsArray, group) => {
     changeFavoriteListener = changeFavoriteOnSmallFilm(film);
     container.appendChild(filmComponent);
 
-    FilmStorage.get().addListener((evt) => {
-      observeFilmStorageDetailedFilm(evt, film, filmComponent);
-      observeFilmStorageSmallFilm(evt, film, detailedFilmComponent);
+    Provider.get().addListener((evt) => {
+      observeProviderDetailedFilm(evt, film, filmComponent);
+      observeProviderSmallFilm(evt, film, detailedFilmComponent);
     });
     watchlistBtn.addEventListener(`click`, changeWatchlistListener);
     watchedBtn.addEventListener(`click`, changeWatchedListener);
@@ -114,47 +112,15 @@ const renderFilms = (container, filmsArray, group) => {
   });
 };
 
-const initFilters = () => {
-  const films = FilmStorage.get().getFilms();
-  const onFiltersClick = (evt) => {
-    evt.preventDefault();
-    const target = evt.target;
-    const filteredFilms = filterFilms(films, target.id);
-    changeClassForActiveFilter(target);
-    hideStatistic();
-    commonFilmsContainer.innerHTML = ``;
-    renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
-  };
-
-  filtersList.forEach((item) => {
-    item.addEventListener(`click`, onFiltersClick);
-  });
-};
-
-const onError = () => {
-  throw new Error(`ERROR LOADING`);
-};
-
-const onSuccess = (filmsArray) => {
-  const topRatedFilms = getShuffledSubarray(filmsArray, CountOfFilms.EXTRA);
-  const mostCommentedFilms = getShuffledSubarray(filmsArray, CountOfFilms.EXTRA);
-
-  // renderFilms(commonFilmsContainer, filmsArray, Group.ALL);
-  // renderFilms(topRatedFilmsContainer, topRatedFilms, Group.TOP_RATED);
-  // renderFilms(mostCommentedFilmsContainer, mostCommentedFilms, Group.MOST_COMMENTED);
-};
-
 renderFilters(FILTERS);
-initFilters();
 
-///// STATISTICS /////
+// /// STATISTICS /////
 import {statsBtn, showStatistic} from './statistics/statistics-setup.js';
 import {Message} from './constants.js';
 statsBtn.addEventListener(`click`, showStatistic);
 
-///// SERVER /////
+// /// SERVER /////
 
-const FILMS_STEP = 5;
 
 const filmsLoader = document.querySelector(`.films-list__show-more`);
 const messageContainer = document.querySelector(`.films-list__title`);
@@ -181,14 +147,14 @@ const getCommentedFilms = (films) => {
 
 showLoadingMessage(Message.LOADING);
 
-network.getFilms()
+Provider.get().getFilms()
   .then((films) => {
-    console.log("Фильмы с сервера: ", films);
-    FilmStorage.get().addFilms(films);
+    console.log(`Фильмы с сервера: `, films);
     hideLoadingMessage();
     allFilms = films;
-    let result = loadMoreFilms(FILMS_STEP);
-    return result;
+    let result = loadMoreFilms(FILMS_PER_LOAD);
+    console.log("result: ", result);
+    initFilters(films);
   })
   .catch(() => {
     showLoadingMessage(Message.ERROR);
@@ -224,7 +190,24 @@ function loadMoreFilms(count) {
   renderFilms(commonFilmsContainer, renderedFilms, Group.ALL);
   renderFilms(topRatedFilmsContainer, getRatedFilms(renderedFilms), Group.TOP_RATED);
   renderFilms(mostCommentedFilmsContainer, getCommentedFilms(renderedFilms), Group.MOST_COMMENTED);
+  return renderedFilms;//
 }
+
+const initFilters = (films) => {
+  const onFiltersClick = (evt) => {
+    evt.preventDefault();
+    const target = evt.target;
+    const filteredFilms = filterFilms(films, target.id);
+    changeClassForActiveFilter(target);
+    hideStatistic();
+    commonFilmsContainer.innerHTML = ``;
+    renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
+  };
+
+  filtersList.forEach((item) => {
+    item.addEventListener(`click`, onFiltersClick);
+  });
+};
 
 function onLoaderClick(evt) {
   evt.preventDefault();

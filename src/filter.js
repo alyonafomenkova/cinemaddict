@@ -7,7 +7,7 @@ const FiltersId = {
   FAVORITES: `favorites`
 };
 
-const FILTERS = [
+export const FILTERS = [
   {
     id: FiltersId.ALL,
     name: `All movies`,
@@ -32,9 +32,9 @@ const FILTERS = [
 ];
 
 const filtersContainer = document.querySelector(`.main-navigation`);
-let filtersList;
+export let filtersList;
 
-const renderFilters = (filters) => {
+export const renderFilters = (filters) => {
   filters.reverse().forEach((filter) => {
     let filterTemplate = ElementBuilder.templateForFilters(filter.id, filter.name, filter.count, filter.isChecked);
     filtersContainer.insertAdjacentHTML(`afterbegin`, filterTemplate);
@@ -42,14 +42,14 @@ const renderFilters = (filters) => {
   });
 };
 
-const changeClassForActiveFilter = (filter) => {
+export const changeClassForActiveFilter = (filter) => {
   filtersList.forEach((item) => {
     item.classList.remove(`main-navigation__item--active`);
   });
   filter.classList.add(`main-navigation__item--active`);
 };
 
-const filterFilms = (films, filterName) => {
+export const filterFilms = (films, filterName) => {
   switch (filterName) {
     case FiltersId.ALL:
       return films;
@@ -63,5 +63,3 @@ const filterFilms = (films, filterName) => {
       return [];
   }
 };
-
-export {FILTERS, filtersList, renderFilters, changeClassForActiveFilter, filterFilms};
