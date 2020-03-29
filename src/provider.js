@@ -40,16 +40,12 @@ const Provider = class {
 
   changeWatchlist(filmId) {
     let film = this.getFilm(filmId);
-    console.log(`>>>>>>>>>>>> 111: Из storage: ${film.isOnWatchlist}`);
 
     if (film) {
       film.isOnWatchlist = !film.isOnWatchlist;
-      console.log(`>>>>>>>>>>>> 222: Обновили: ${film.isOnWatchlist}`);
       return this.updateFilm({id: film.id, data: film})
         .then(() => {
           this.notifyWatchlistChange(filmId, film.isOnWatchlist);
-          console.log(`Watchlist has been changed for film with ID = ${filmId}`);
-          console.log("Провайдер возвращает film.isOnWatchlist: ", film.isOnWatchlist);
           return film;
         })
         .catch((error) => {
@@ -194,9 +190,7 @@ const Provider = class {
     } else {
       const rawFilmsMap = this._storage.getAll();
       const rawFilms = objectToArray(rawFilmsMap);
-      console.log("[PROVIDER] getFilms rawFilms: ", rawFilms);
       const films = Adapter.parseFilms(rawFilms);
-      console.log("[PROVIDER] getFilm films: ", films);
       return Promise.resolve(films);
     }
   }
@@ -221,14 +215,13 @@ const Provider = class {
       return this._network.updateFilm({id, data})
         .then((film) => {
           this._storage.setItem({key: data.id, item: data.toRAW()});
-          console.log("ffffffff", film);
           return film;
         });
     } else {
       const film = data;
       this._needSync = true;
-      this._storage.setItem({key: film.id, item: film});
-      return Promise.resolve(Adapter.parseFilm(film));
+      this._storage.setItem({key: film.id, item: film.toRAW()});
+      return Promise.resolve(film);
     }
   }
 

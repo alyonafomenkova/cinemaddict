@@ -54,7 +54,6 @@ class Adapter {
   }
 
   static parseFilm(data) {
-    console.log("adapter data: ", data);
     return new Adapter(data);
   }
 
