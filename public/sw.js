@@ -9,7 +9,6 @@ self.addEventListener(`install`, (evt) => {
           `/`,
           `/index.html`,
           `/bundle.js`,
-          `./css/*`
           `./css/normalize.css`,
           `./css/main.css`,
           `./images/posters/accused.jpg`,
@@ -30,24 +29,4 @@ self.addEventListener(`install`, (evt) => {
 
 self.addEventListener(`activate`, (evt) => {
   console.log(`sw, activate`, {evt});
-});
-
-self.addEventListener(`fetch`, (evt) => {
-  console.log(`sw, fetch`, {evt, request: evt.request});
-  evt.respondWith(
-    caches.match(evt.request)
-      .then((response) => {
-        console.log("Find in cache: ", response);
-          return fetch(evt.request)
-            .then(function(response) {
-              caches.open(CACHE_NAME)
-                .then((cache) => cache.put(evt.request, response.clone()));
-              return response.clone();
-            })
-            .catch(() => {
-              caches.match();
-            })
-      })
-      .catch((err) => console.error({err}))
-  );
 });
