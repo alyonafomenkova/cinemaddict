@@ -2,13 +2,17 @@ import {Adapter} from "./adapter";
 import {objectToArray} from "./util.js";
 import {network} from "./main";
 import {storage} from "./main";
-import {ProviderEventType} from "./constants";
+import {Group, ProviderEventType} from "./constants";
 
 const Provider = class {
   constructor({network, storage, generateId}) {
     this._network = network;
     this._storage = storage;
     this._generateId = generateId;
+    //
+    this._renderedFilms = [];
+    this._from = 0;
+    //
     this._needSync = false;
     this._listeners = [];
     this.addListener = this.addListener.bind(this);
@@ -25,6 +29,30 @@ const Provider = class {
   addListener(listener) {
     this._listeners.push(listener);
     console.log(`[PROVIDER] Total ${this._listeners.length} listeners`);
+  }
+
+  getRenderedFilms() {
+    return this._renderedFilms;
+  }
+
+  loadMoreFilms(allFilms, count) {
+    let to = this._from + count - 1;
+
+    if (to >= allFilms.length) {
+      to = allFilms.length - 1;
+    }
+
+    if (this._from > allFilms.length) {
+      return;
+    }
+
+    for (let i = this._from; i <= to; i++) {
+      this._renderedFilms.push(allFilms[i]);
+    }
+
+    this._from = this._renderedFilms.length;
+    console.log("[PROVIDER] renderedFilms: ", this._renderedFilms);//
+    return this._renderedFilms;
   }
 
   notifyWatchlistChange(filmId, isOnWatchlist) {
@@ -215,12 +243,14 @@ const Provider = class {
       return this._network.updateFilm({id, data})
         .then((film) => {
           this._storage.setItem({key: data.id, item: data.toRAW()});
+          this._renderedFilms[data.id] = data;
           return film;
         });
     } else {
       const film = data;
       this._needSync = true;
       this._storage.setItem({key: film.id, item: film.toRAW()});
+      this._renderedFilms[data.id] = data;
       return Promise.resolve(film);
     }
   }

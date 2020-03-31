@@ -1,4 +1,5 @@
 import {ElementBuilder} from './element-builder.js';
+import {Provider} from "./provider";
 
 const FiltersId = {
   ALL: `all`,
@@ -11,32 +12,38 @@ export const FILTERS = [
   {
     id: FiltersId.ALL,
     name: `All movies`,
-    count: null,
     isChecked: true
   },
   {
     id: FiltersId.WATCHLIST,
-    name: `Watchlist`,
-    count: 13
+    name: `Watchlist`
   },
   {
     id: FiltersId.HISTORY,
-    name: `History`,
-    count: 4
+    name: `History`
   },
   {
     id: FiltersId.FAVORITES,
-    name: `Favorites`,
-    count: 8
+    name: `Favorites`
   }
 ];
 
 const filtersContainer = document.querySelector(`.main-navigation`);
 export let filtersList;
 
+export const setCountFilmForFilter = (films) => {
+  const watchlistCountField = document.querySelector(`.watchlist-count`);
+  const watchedCountField = document.querySelector(`.history-count`);
+  const favoriteCountField = document.querySelector(`.favorites-count`);
+
+  watchlistCountField.innerHTML = filterFilms(films, FiltersId.WATCHLIST).length;
+  watchedCountField.innerHTML = filterFilms(films, FiltersId.HISTORY).length;
+  favoriteCountField.innerHTML = filterFilms(films, FiltersId.FAVORITES).length;
+};
+
 export const renderFilters = (filters) => {
   filters.reverse().forEach((filter) => {
-    let filterTemplate = ElementBuilder.templateForFilters(filter.id, filter.name, filter.count, filter.isChecked);
+    let filterTemplate = ElementBuilder.templateForFilters(filter.id, filter.name, filter.isChecked);
     filtersContainer.insertAdjacentHTML(`afterbegin`, filterTemplate);
     filtersList = filtersContainer.querySelectorAll(`.main-navigation__item`);
   });
@@ -62,4 +69,9 @@ export const filterFilms = (films, filterName) => {
     default:
       return [];
   }
+};
+
+export const observeCountFilms = () => {
+  const films = Provider.get().getRenderedFilms();
+  setCountFilmForFilter(films);
 };

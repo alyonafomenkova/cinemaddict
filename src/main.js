@@ -1,6 +1,6 @@
 import {CountOfFilms, generateFilms} from './data.js';
 import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
-import {FILTERS, filtersList, renderFilters, changeClassForActiveFilter, filterFilms} from './filter.js';
+import {FILTERS, filtersList, renderFilters, setCountFilmForFilter, changeClassForActiveFilter, filterFilms, observeCountFilms} from './filter.js';
 import {FilmStorage} from './film-storage.js';
 import {Network} from './network';
 import {ElementBuilder} from './element-builder.js';
@@ -34,7 +34,6 @@ window.addEventListener(`online`, () => {
 
 const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
-  console.log("[renderFilms] filmsArray: ", filmsArray);
 
   filmsArray.map((film) => (film.id)).forEach((filmId) => {
     const overlay = ElementBuilder.createOverlay();
@@ -60,7 +59,7 @@ const renderFilms = (container, filmsArray, group) => {
     };
 
     const onSmallFilmClick = () => {
-      const film = allFilms.find((x) => x.id == filmId);
+      const film = allFilmsInProvider.find((x) => x.id == filmId);
       const emoji = detailedFilmComponent.querySelector(`.film-details__emoji-list`);
       const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
       const ratingArea = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
@@ -85,7 +84,7 @@ const renderFilms = (container, filmsArray, group) => {
       favoriteInput.addEventListener(`click`, changeFavoriteListener);
     };
 
-    const film = allFilms.find((x) => x.id == filmId);
+    const film = allFilmsInProvider.find((x) => x.id == filmId);
 
     if (film) {
       filmComponent = ElementBuilder.buildSmallFilmElement(group, film, onSmallFilmClick);
@@ -105,14 +104,13 @@ const renderFilms = (container, filmsArray, group) => {
     Provider.get().addListener((evt) => {
       observeProviderDetailedFilm(evt, film, filmComponent);
       observeProviderSmallFilm(evt, film, detailedFilmComponent);
+      observeCountFilms();//
     });
     watchlistBtn.addEventListener(`click`, changeWatchlistListener);
     watchedBtn.addEventListener(`click`, changeWatchedListener);
     favoriteBtn.addEventListener(`click`, changeFavoriteListener);
   });
 };
-
-renderFilters(FILTERS);
 
 // /// STATISTICS /////
 import {statsBtn, showStatistic} from './statistics/statistics-setup.js';
@@ -124,7 +122,7 @@ statsBtn.addEventListener(`click`, showStatistic);
 
 const filmsLoader = document.querySelector(`.films-list__show-more`);
 const messageContainer = document.querySelector(`.films-list__title`);
-let allFilms; //
+let allFilmsInProvider;
 
 const showLoadingMessage = (text) => {
   messageContainer.classList.remove(`visually-hidden`);
@@ -151,46 +149,26 @@ Provider.get().getFilms()
   .then((films) => {
     console.log(`Фильмы с сервера: `, films);
     hideLoadingMessage();
-    allFilms = films;
-    let result = loadMoreFilms(FILMS_PER_LOAD);
-    console.log("result: ", result);
-    initFilters(films);
+    allFilmsInProvider = films;
+    let visibleFilms = Provider.get().loadMoreFilms(films, FILMS_PER_LOAD);
+    console.log(`visibleFilms: `, visibleFilms);
+    clearAndRenderFilms(visibleFilms);
+    renderFilters(FILTERS);
+    setCountFilmForFilter(visibleFilms);
+    initFilters(visibleFilms);
+    filmsLoader.addEventListener(`click`, onLoaderClick(films));
   })
   .catch(() => {
     showLoadingMessage(Message.ERROR);
   });
 
-let renderedFilms = [];
-let from = 0;
-
-function loadMoreFilms(count) {
-  let to = from + count - 1;
-
-  if (to >= allFilms.length) {
-    to = allFilms.length - 1;
-  }
-
-  if (from > allFilms.length) {
-    return;
-  }
-
-  for (let i = from; i <= to; i++) {
-    renderedFilms.push(allFilms[i]);
-  }
-
-  from = renderedFilms.length;
-
-  if (renderedFilms.length === allFilms.length) {
-    filmsLoader.classList.add(`visually-hidden`);
-  }
-
+function clearAndRenderFilms(visibleFilms) {
   commonFilmsContainer.innerHTML = ``;
   topRatedFilmsContainer.innerHTML = ``;
   mostCommentedFilmsContainer.innerHTML = ``;
-  renderFilms(commonFilmsContainer, renderedFilms, Group.ALL);
-  renderFilms(topRatedFilmsContainer, getRatedFilms(renderedFilms), Group.TOP_RATED);
-  renderFilms(mostCommentedFilmsContainer, getCommentedFilms(renderedFilms), Group.MOST_COMMENTED);
-  return renderedFilms;//
+  renderFilms(commonFilmsContainer, visibleFilms, Group.ALL);
+  renderFilms(topRatedFilmsContainer, getRatedFilms(visibleFilms), Group.TOP_RATED);
+  renderFilms(mostCommentedFilmsContainer, getCommentedFilms(visibleFilms), Group.MOST_COMMENTED);
 }
 
 const initFilters = (films) => {
@@ -201,6 +179,8 @@ const initFilters = (films) => {
     changeClassForActiveFilter(target);
     hideStatistic();
     commonFilmsContainer.innerHTML = ``;
+    renderFilters(FILTERS);
+    setCountFilmForFilter(target, filteredFilms.length);
     renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
   };
 
@@ -209,9 +189,14 @@ const initFilters = (films) => {
   });
 };
 
-function onLoaderClick(evt) {
-  evt.preventDefault();
-  loadMoreFilms(FILMS_PER_LOAD);
+function onLoaderClick(films) {
+  return function () {
+    event.preventDefault();
+    const newVisibleFilms = Provider.get().loadMoreFilms(films, FILMS_PER_LOAD);
+    clearAndRenderFilms(newVisibleFilms);
+    setCountFilmForFilter(newVisibleFilms);
+    if (newVisibleFilms.length === allFilmsInProvider.length) {
+      filmsLoader.classList.add(`visually-hidden`);
+    }
+  };
 }
-
-filmsLoader.addEventListener(`click`, onLoaderClick);
