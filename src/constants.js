@@ -8,6 +8,23 @@ export const Group = {
   MOST_COMMENTED: 2
 };
 
+export const Rating = {
+  low: {
+    count: {
+      min: 1,
+      max: 10
+    },
+    name: `novice`,
+  },
+  medium: {
+    count: 20,
+    name: `fan`,
+  },
+  high: {
+    name: `movie buff`,
+  },
+};
+
 export const ProviderEventType = {
   COMMENT_ADDED: `comment_added`,
   USER_RATING_CHANGED: `user_rating_changed`,

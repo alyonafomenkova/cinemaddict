@@ -7,7 +7,7 @@ import {ElementBuilder} from './element-builder.js';
 import {Provider} from './provider.js';
 import {Statistics} from './statistics/statistics.js';
 import {hideStatistic} from './statistics/statistics-setup.js';
-import {Group, KeyCode, ProviderEventType} from './constants';
+import {Group, KeyCode, ProviderEventType, Rating} from './constants';
 import {createFilmComponent, observeProviderDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
 import {changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeProviderSmallFilm} from './detailed-film';
 import moment from "moment";
@@ -20,6 +20,7 @@ const filmsContainers = document.querySelectorAll(`.films-list__container`);
 const commonFilmsContainer = filmsContainers[0];
 const topRatedFilmsContainer = filmsContainers[1];
 const mostCommentedFilmsContainer = filmsContainers[2];
+const profileRating = document.querySelector(`.profile__rating`);
 
 export const network = new Network({endPoint: END_POINT, authorization: AUTHORIZATION});
 export const storage = new FilmStorage({key: FILMS_STORE_KEY, storage: localStorage});
@@ -31,6 +32,21 @@ window.addEventListener(`online`, () => {
   document.title = document.title.split(`[OFFLINE]`)[0];
   Provider.get().syncFilms();
 });
+
+const updateProfileRating = () => {
+  const films = Provider.get().getRenderedFilms();
+  const count = (films.filter((film) => film.isWatched)).length;
+
+  if (count < Rating.low.count.min) {
+    profileRating.textContent = ``;
+  } else if (count <= Rating.low.count.max) {
+    profileRating.textContent = Rating.low.name;
+  } else if (count <= Rating.medium.count) {
+    profileRating.textContent = Rating.medium.name;
+  } else {
+    profileRating.textContent = Rating.high.name;
+  }
+};
 
 const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
@@ -104,7 +120,8 @@ const renderFilms = (container, filmsArray, group) => {
     Provider.get().addListener((evt) => {
       observeProviderDetailedFilm(evt, film, filmComponent);
       observeProviderSmallFilm(evt, film, detailedFilmComponent);
-      observeCountFilms();//
+      observeCountFilms();
+      updateProfileRating();
     });
     watchlistBtn.addEventListener(`click`, changeWatchlistListener);
     watchedBtn.addEventListener(`click`, changeWatchedListener);
@@ -155,6 +172,7 @@ Provider.get().getFilms()
     clearAndRenderFilms(visibleFilms);
     renderFilters(FILTERS);
     setCountFilmForFilter(visibleFilms);
+    updateProfileRating();
     initFilters(visibleFilms);
     filmsLoader.addEventListener(`click`, onLoaderClick(films));
   })
@@ -195,6 +213,7 @@ function onLoaderClick(films) {
     const newVisibleFilms = Provider.get().loadMoreFilms(films, FILMS_PER_LOAD);
     clearAndRenderFilms(newVisibleFilms);
     setCountFilmForFilter(newVisibleFilms);
+    updateProfileRating();
     if (newVisibleFilms.length === allFilmsInProvider.length) {
       filmsLoader.classList.add(`visually-hidden`);
     }
