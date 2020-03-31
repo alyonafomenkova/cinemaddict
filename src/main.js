@@ -21,6 +21,7 @@ const commonFilmsContainer = filmsContainers[0];
 const topRatedFilmsContainer = filmsContainers[1];
 const mostCommentedFilmsContainer = filmsContainers[2];
 const profileRating = document.querySelector(`.profile__rating`);
+const footerStatistics = document.querySelector(`.footer__statistics p`);
 
 export const network = new Network({endPoint: END_POINT, authorization: AUTHORIZATION});
 export const storage = new FilmStorage({key: FILMS_STORE_KEY, storage: localStorage});
@@ -46,6 +47,11 @@ const updateProfileRating = () => {
   } else {
     profileRating.textContent = Rating.high.name;
   }
+};
+
+const setupFooterStatistics = (allFilms) => {
+  const filmsCount = allFilms.length;
+  footerStatistics.textContent = `${filmsCount} movie${filmsCount === 1 ? `` : `s`} inside`;
 };
 
 const renderFilms = (container, filmsArray, group) => {
@@ -174,6 +180,7 @@ Provider.get().getFilms()
     setCountFilmForFilter(visibleFilms);
     updateProfileRating();
     initFilters(visibleFilms);
+    setupFooterStatistics(allFilmsInProvider);
     filmsLoader.addEventListener(`click`, onLoaderClick(films));
   })
   .catch(() => {
