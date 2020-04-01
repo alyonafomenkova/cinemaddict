@@ -1,6 +1,7 @@
 import {CountOfFilms, generateFilms} from './data.js';
 import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
 import {FILTERS, filtersList, renderFilters, setCountFilmForFilter, changeClassForActiveFilter, filterFilms, observeCountFilms} from './filter.js';
+import {clearSearchContainer, initSearch} from './search.js';
 import {FilmStorage} from './film-storage.js';
 import {Network} from './network';
 import {ElementBuilder} from './element-builder.js';
@@ -17,7 +18,7 @@ const AUTHORIZATION = `Basic dXNlckBwYXNzdffysAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/moowle`;
 const FILMS_STORE_KEY = `films-store-key`;
 const filmsContainers = document.querySelectorAll(`.films-list__container`);
-const commonFilmsContainer = filmsContainers[0];
+export const commonFilmsContainer = filmsContainers[0];
 const topRatedFilmsContainer = filmsContainers[1];
 const mostCommentedFilmsContainer = filmsContainers[2];
 const profileRating = document.querySelector(`.profile__rating`);
@@ -54,7 +55,7 @@ const setupFooterStatistics = (allFilms) => {
   footerStatistics.textContent = `${filmsCount} movie${filmsCount === 1 ? `` : `s`} inside`;
 };
 
-const renderFilms = (container, filmsArray, group) => {
+export const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
 
   filmsArray.map((film) => (film.id)).forEach((filmId) => {
@@ -178,6 +179,7 @@ Provider.get().getFilms()
     clearAndRenderFilms(visibleFilms);
     renderFilters(FILTERS);
     setCountFilmForFilter(visibleFilms);
+    initSearch(visibleFilms);
     updateProfileRating();
     initFilters(visibleFilms);
     setupFooterStatistics(allFilmsInProvider);
@@ -201,11 +203,10 @@ const initFilters = (films) => {
     evt.preventDefault();
     const target = evt.target;
     const filteredFilms = filterFilms(films, target.id);
+    clearSearchContainer();
     changeClassForActiveFilter(target);
     hideStatistic();
     commonFilmsContainer.innerHTML = ``;
-    renderFilters(FILTERS);
-    setCountFilmForFilter(target, filteredFilms.length);
     renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
   };
 
@@ -218,6 +219,7 @@ function onLoaderClick(films) {
   return function () {
     event.preventDefault();
     const newVisibleFilms = Provider.get().loadMoreFilms(films, FILMS_PER_LOAD);
+    clearSearchContainer();
     clearAndRenderFilms(newVisibleFilms);
     setCountFilmForFilter(newVisibleFilms);
     updateProfileRating();

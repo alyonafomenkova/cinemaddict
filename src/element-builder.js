@@ -232,6 +232,14 @@ class ElementBuilder {
       </a>`.trim();
   }
 
+  static templateForSearch() {
+    return `
+      <form class="search">
+        <input type="text" name="search" class="search__field" placeholder="Search">
+        <button type="submit" class="visually-hidden">Search</button>
+      </form>`.trim();
+  }
+
   static buildSmallFilmElement(group, film, clickListener) {
     let template;
     switch (group) {
