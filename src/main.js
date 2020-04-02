@@ -135,7 +135,8 @@ export const renderFilms = (container, filmsArray, group) => {
     changeFavoriteListener = changeFavoriteOnSmallFilm(film);
     container.appendChild(filmComponent);
 
-    Provider.get().addListener((evt) => {
+    console.log("ADD listener small_" + film.id);
+    Provider.get().addListener("small_" + film.id, (evt) => {
       observeProviderDetailedFilm(evt, film, filmComponent);
       observeProviderSmallFilm(evt, film, detailedFilmComponent);
       observeCountFilms();
@@ -204,9 +205,13 @@ function clearAndRenderFilms(visibleFilms) {
   commonFilmsContainer.innerHTML = ``;
   topRatedFilmsContainer.innerHTML = ``;
   mostCommentedFilmsContainer.innerHTML = ``;
+  visibleFilms.forEach((film) => {
+    Provider.get().removeListener("small_" + film.id);
+  });
+
   renderFilms(commonFilmsContainer, visibleFilms, Group.ALL);
-  renderFilms(topRatedFilmsContainer, getRatedFilms(visibleFilms), Group.TOP_RATED);
-  renderFilms(mostCommentedFilmsContainer, getCommentedFilms(visibleFilms), Group.MOST_COMMENTED);
+  //renderFilms(topRatedFilmsContainer, getRatedFilms(visibleFilms), Group.TOP_RATED);
+  //renderFilms(mostCommentedFilmsContainer, getCommentedFilms(visibleFilms), Group.MOST_COMMENTED);
 }
 
 const initFilters = (films) => {
