@@ -36,6 +36,6 @@ export const ProviderEventType = {
 export const Message = {
   LOADING: `Loading moovies…`,
   ERROR: `Something went wrong while loading movies. Check your connection or try again later`,
-  FILTER: `Maybe at firs you'll add some films to this list?`,
-  SEARCH: `Unable to find ani movies on your request`,
+  COMMENT_ADDED: `Comment added`,
+  COMMENT_DELETED: `Comment deleted`
 };

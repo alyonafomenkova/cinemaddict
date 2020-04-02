@@ -2,6 +2,8 @@ import {ProviderEventType, KeyCode} from "./constants";
 import {Provider} from "./provider.js";
 import {ElementBuilder} from './element-builder.js';
 import moment from 'moment';
+import {Message} from './constants';
+import {setSmallCardCommentsCount} from './small-film';
 
 const setDetailedCardCommentsCount = (count) => {
   const commentsCountField = document.querySelector(`.film-details__comments-count`);
@@ -21,12 +23,21 @@ const shake = (element) => {
   }, ANIMATION_TIMEOUT);
 };
 
+export const hideCommentControls = (detailedFilmComponent) => {
+  const statusUserControl = detailedFilmComponent.querySelector(`.film-details__watched-status`);
+  const undoCommentButton = detailedFilmComponent.querySelector(`.film-details__watched-reset`);
+  statusUserControl.innerHTML = ``;
+  undoCommentButton.classList.add(`visually-hidden`);
+};
+
 function addComment(film) {
   return function () {
     const textInput = document.querySelector(`.film-details__comment-input`);
     const commentsList = document.querySelector(`.film-details__comments-list`);
 
     if (event.ctrlKey && event.keyCode === KeyCode.ENTER && textInput.value) {
+      const statusUserControl = document.querySelector(`.film-details__watched-status`);
+      const undoCommentButton = document.querySelector(`.film-details__watched-reset`);
       const provider = Provider.get();
       const newComment = {};
       const emoji = document.querySelector(`.film-details__add-emoji`);
@@ -43,6 +54,9 @@ function addComment(film) {
           setDetailedCardCommentsCount(film.comments.length);
           textInput.value = ``;
           textInput.disabled = false;
+          statusUserControl.innerHTML = Message.COMMENT_ADDED;
+          undoCommentButton.classList.remove(`visually-hidden`);
+          undoCommentButton.addEventListener(`click`, deleteLastComment(film, statusUserControl));
         })
         .catch((error) => {
           console.log(error);
@@ -53,6 +67,25 @@ function addComment(film) {
     }
   };
 }
+
+const deleteLastComment = (film, statusUserControl) => {
+  return function () {
+    const commentsList = document.querySelector(`.film-details__comments-list`);
+    const undoCommentButton = document.querySelector(`.film-details__watched-reset`);
+    film.comments.pop();
+    Provider.get().updateFilm({id: film.id, data: film})
+      .then(() => {
+        commentsList.innerHTML = ElementBuilder.templateForComments(film);
+        setDetailedCardCommentsCount(film.comments.length);
+        setSmallCardCommentsCount(film, film.comments.length);
+        statusUserControl.innerHTML = Message.COMMENT_DELETED;
+        undoCommentButton.classList.add(`visually-hidden`);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+};
 
 function getEmoji(emo) {
   const emoji = {

@@ -10,7 +10,7 @@ import {Statistics} from './statistics/statistics.js';
 import {hideStatistic} from './statistics/statistics-setup.js';
 import {Group, KeyCode, ProviderEventType, Rating} from './constants';
 import {createFilmComponent, observeProviderDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
-import {changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeProviderSmallFilm} from './detailed-film';
+import {hideCommentControls, changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeProviderSmallFilm} from './detailed-film';
 import moment from "moment";
 
 const FILMS_PER_LOAD = 5;
@@ -91,6 +91,7 @@ export const renderFilms = (container, filmsArray, group) => {
       const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
       body.appendChild(overlay);
       body.appendChild(detailedFilmComponent);
+      hideCommentControls(detailedFilmComponent);
 
       changeEmojiListener = changeEmoji(detailedFilmComponent);
       commentAddListener = addComment(film);
