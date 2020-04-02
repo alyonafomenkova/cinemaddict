@@ -68,7 +68,7 @@ export const renderFilms = (container, filmsArray, group) => {
     let changeWatchedListener = null;
     let changeFavoriteListener = null;
 
-    const onDetailedFilmClick = () => {
+    const removeDetailedFilmComponent = () => {
       const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
       const watchListInput = detailedFilmComponent.querySelector(`#addwatchlist`);
       const watchedInput = detailedFilmComponent.querySelector(`#watched`);
@@ -81,6 +81,13 @@ export const renderFilms = (container, filmsArray, group) => {
       favoriteInput.removeEventListener(`click`, changeFavoriteListener);
     };
 
+    const onEscPress = (evt) => {
+      if (evt.keyCode === KeyCode.ESC) {
+        console.log("ABC123");
+        removeDetailedFilmComponent();
+      }
+    };
+
     const onSmallFilmClick = () => {
       const film = allFilmsInProvider.find((x) => x.id == filmId);
       const emoji = detailedFilmComponent.querySelector(`.film-details__emoji-list`);
@@ -90,8 +97,11 @@ export const renderFilms = (container, filmsArray, group) => {
       const watchedInput = detailedFilmComponent.querySelector(`#watched`);
       const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
       body.appendChild(overlay);
+      console.log("appending: ", detailedFilmComponent);//
       body.appendChild(detailedFilmComponent);
       hideCommentControls(detailedFilmComponent);
+
+      document.addEventListener(`keydown`, onEscPress);
 
       changeEmojiListener = changeEmoji(detailedFilmComponent);
       commentAddListener = addComment(film);
@@ -116,7 +126,7 @@ export const renderFilms = (container, filmsArray, group) => {
       console.error(`Film with ID  ${filmId} not found`);
     }
 
-    const detailedFilmComponent = ElementBuilder.buildDetailedFilmElement(film, onDetailedFilmClick);
+    const detailedFilmComponent = ElementBuilder.buildDetailedFilmElement(film, removeDetailedFilmComponent);
     const watchlistBtn = filmComponent.querySelector(`.film-card__controls-item--add-to-watchlist`);
     const watchedBtn = filmComponent.querySelector(`.film-card__controls-item--mark-as-watched`);
     const favoriteBtn = filmComponent.querySelector(`.film-card__controls-item--favorite`);
