@@ -1,26 +1,28 @@
-import {CountOfFilms, generateFilms} from './data.js';
-import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
-import {FILTERS, filtersList, renderFilters, changeClassForActiveFilter, filterFilms} from './filter.js';
+import {setUserRank} from './util.js';
+import {filtersList, renderFilters, setCountFilmForFilter, changeClassForActiveFilter, filterFilms, observeCountFilms} from './filter.js';
+import {clearSearchContainer, initSearch} from './search.js';
+import {Group, KeyCode, FiltersId, FILTERS, Message} from './constants';
+import {observeProviderDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
+import {hideCommentControls, changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeProviderSmallFilm} from './detailed-film';
+import {statsBtn, showStatistic, hideStatistic} from './statistics/statistics-setup.js';
 import {FilmStorage} from './film-storage.js';
 import {Network} from './network';
 import {ElementBuilder} from './element-builder.js';
 import {Provider} from './provider.js';
-import {Statistics} from './statistics/statistics.js';
-import {hideStatistic} from './statistics/statistics-setup.js';
-import {Group, KeyCode, ProviderEventType} from './constants';
-import {createFilmComponent, observeProviderDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
-import {changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeProviderSmallFilm} from './detailed-film';
-import moment from "moment";
 
 const FILMS_PER_LOAD = 5;
 const AUTHORIZATION = `Basic dXNlckBwYXNzdffysAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/moowle`;
 const FILMS_STORE_KEY = `films-store-key`;
+
 const filmsContainers = document.querySelectorAll(`.films-list__container`);
-const commonFilmsContainer = filmsContainers[0];
+export const commonFilmsContainer = filmsContainers[0];
 const topRatedFilmsContainer = filmsContainers[1];
 const mostCommentedFilmsContainer = filmsContainers[2];
-
+const profileRating = document.querySelector(`.profile__rating`);
+const footerStatistics = document.querySelector(`.footer__statistics p`);
+const filmsLoader = document.querySelector(`.films-list__show-more`);
+const messageContainer = document.querySelector(`.films-list__title`);
 export const network = new Network({endPoint: END_POINT, authorization: AUTHORIZATION});
 export const storage = new FilmStorage({key: FILMS_STORE_KEY, storage: localStorage});
 
@@ -32,9 +34,17 @@ window.addEventListener(`online`, () => {
   Provider.get().syncFilms();
 });
 
-const renderFilms = (container, filmsArray, group) => {
+const updateProfileRating = (films) => {
+  profileRating.textContent = setUserRank(films);
+};
+
+const setupFooterStatistics = (allFilms) => {
+  const filmsCount = allFilms.length;
+  footerStatistics.textContent = `${filmsCount} movie${filmsCount === 1 ? `` : `s`} inside`;
+};
+
+export const renderFilms = (container, filmsArray, group) => {
   const body = document.querySelector(`body`);
-  console.log("[renderFilms] filmsArray: ", filmsArray);
 
   filmsArray.map((film) => (film.id)).forEach((filmId) => {
     const overlay = ElementBuilder.createOverlay();
@@ -46,7 +56,7 @@ const renderFilms = (container, filmsArray, group) => {
     let changeWatchedListener = null;
     let changeFavoriteListener = null;
 
-    const onDetailedFilmClick = () => {
+    const removeDetailedFilmComponent = () => {
       const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
       const watchListInput = detailedFilmComponent.querySelector(`#addwatchlist`);
       const watchedInput = detailedFilmComponent.querySelector(`#watched`);
@@ -59,8 +69,14 @@ const renderFilms = (container, filmsArray, group) => {
       favoriteInput.removeEventListener(`click`, changeFavoriteListener);
     };
 
+    const onEscPress = (evt) => {
+      if (evt.keyCode === KeyCode.ESC) {
+        removeDetailedFilmComponent();
+      }
+    };
+
     const onSmallFilmClick = () => {
-      const film = allFilms.find((x) => x.id == filmId);
+      const film = allFilmsInProvider.find((x) => x.id === filmId);
       const emoji = detailedFilmComponent.querySelector(`.film-details__emoji-list`);
       const commentsArea = detailedFilmComponent.querySelector(`.film-details__new-comment`);
       const ratingArea = detailedFilmComponent.querySelector(`.film-details__user-rating-score`);
@@ -69,6 +85,7 @@ const renderFilms = (container, filmsArray, group) => {
       const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
       body.appendChild(overlay);
       body.appendChild(detailedFilmComponent);
+      hideCommentControls(detailedFilmComponent);
 
       changeEmojiListener = changeEmoji(detailedFilmComponent);
       commentAddListener = addComment(film);
@@ -77,6 +94,7 @@ const renderFilms = (container, filmsArray, group) => {
       changeWatchedListener = changeWatched(film);
       changeFavoriteListener = changeFavorite(film);
 
+      document.addEventListener(`keydown`, onEscPress);
       emoji.addEventListener(`click`, changeEmojiListener);
       commentsArea.addEventListener(`keydown`, commentAddListener);
       ratingArea.addEventListener(`click`, changeRatingListener);
@@ -85,15 +103,16 @@ const renderFilms = (container, filmsArray, group) => {
       favoriteInput.addEventListener(`click`, changeFavoriteListener);
     };
 
-    const film = allFilms.find((x) => x.id == filmId);
+    const film = allFilmsInProvider.find((x) => x.id === filmId);
 
     if (film) {
       filmComponent = ElementBuilder.buildSmallFilmElement(group, film, onSmallFilmClick);
     } else {
+      // eslint-disable-next-line no-console
       console.error(`Film with ID  ${filmId} not found`);
     }
 
-    const detailedFilmComponent = ElementBuilder.buildDetailedFilmElement(film, onDetailedFilmClick);
+    const detailedFilmComponent = ElementBuilder.buildDetailedFilmElement(film, removeDetailedFilmComponent);
     const watchlistBtn = filmComponent.querySelector(`.film-card__controls-item--add-to-watchlist`);
     const watchedBtn = filmComponent.querySelector(`.film-card__controls-item--mark-as-watched`);
     const favoriteBtn = filmComponent.querySelector(`.film-card__controls-item--favorite`);
@@ -102,29 +121,26 @@ const renderFilms = (container, filmsArray, group) => {
     changeFavoriteListener = changeFavoriteOnSmallFilm(film);
     container.appendChild(filmComponent);
 
-    Provider.get().addListener((evt) => {
+    const listener = (evt) => {
       observeProviderDetailedFilm(evt, film, filmComponent);
       observeProviderSmallFilm(evt, film, detailedFilmComponent);
-    });
+      observeCountFilms();
+      updateProfileRating(filmsArray);
+    };
+    if (group === Group.TOP_RATED) {
+      Provider.get().addListener(`rated_` + film.id, listener);
+    } else if (group === Group.MOST_COMMENTED) {
+      Provider.get().addListener(`commented_` + film.id, listener);
+    } else {
+      Provider.get().addListener(`small_` + film.id, listener);
+    }
     watchlistBtn.addEventListener(`click`, changeWatchlistListener);
     watchedBtn.addEventListener(`click`, changeWatchedListener);
     favoriteBtn.addEventListener(`click`, changeFavoriteListener);
   });
 };
 
-renderFilters(FILTERS);
-
-// /// STATISTICS /////
-import {statsBtn, showStatistic} from './statistics/statistics-setup.js';
-import {Message} from './constants.js';
-statsBtn.addEventListener(`click`, showStatistic);
-
-// /// SERVER /////
-
-
-const filmsLoader = document.querySelector(`.films-list__show-more`);
-const messageContainer = document.querySelector(`.films-list__title`);
-let allFilms; //
+let allFilmsInProvider;
 
 const showLoadingMessage = (text) => {
   messageContainer.classList.remove(`visually-hidden`);
@@ -145,63 +161,34 @@ const getCommentedFilms = (films) => {
     .sort((left, right) => right.comments.length - left.comments.length).slice(0, 2);
 };
 
-showLoadingMessage(Message.LOADING);
-
-Provider.get().getFilms()
-  .then((films) => {
-    console.log(`Фильмы с сервера: `, films);
-    hideLoadingMessage();
-    allFilms = films;
-    let result = loadMoreFilms(FILMS_PER_LOAD);
-    console.log("result: ", result);
-    initFilters(films);
-  })
-  .catch(() => {
-    showLoadingMessage(Message.ERROR);
-  });
-
-let renderedFilms = [];
-let from = 0;
-
-function loadMoreFilms(count) {
-  let to = from + count - 1;
-
-  if (to >= allFilms.length) {
-    to = allFilms.length - 1;
-  }
-
-  if (from > allFilms.length) {
-    return;
-  }
-
-  for (let i = from; i <= to; i++) {
-    renderedFilms.push(allFilms[i]);
-  }
-
-  from = renderedFilms.length;
-
-  if (renderedFilms.length === allFilms.length) {
-    filmsLoader.classList.add(`visually-hidden`);
-  }
-
+const clearAndRenderFilms = (visibleFilms) => {
   commonFilmsContainer.innerHTML = ``;
   topRatedFilmsContainer.innerHTML = ``;
   mostCommentedFilmsContainer.innerHTML = ``;
-  renderFilms(commonFilmsContainer, renderedFilms, Group.ALL);
-  renderFilms(topRatedFilmsContainer, getRatedFilms(renderedFilms), Group.TOP_RATED);
-  renderFilms(mostCommentedFilmsContainer, getCommentedFilms(renderedFilms), Group.MOST_COMMENTED);
-  return renderedFilms;//
-}
+  renderFilms(commonFilmsContainer, visibleFilms, Group.ALL);
+  renderFilms(topRatedFilmsContainer, getRatedFilms(visibleFilms), Group.TOP_RATED);
+  renderFilms(mostCommentedFilmsContainer, getCommentedFilms(visibleFilms), Group.MOST_COMMENTED);
+};
+
+const removeListeners = (films) => {
+  films.forEach((film) => {
+    Provider.get().removeListener(`small_` + film.id);
+  });
+};
 
 const initFilters = (films) => {
   const onFiltersClick = (evt) => {
     evt.preventDefault();
     const target = evt.target;
-    const filteredFilms = filterFilms(films, target.id);
-    changeClassForActiveFilter(target);
-    hideStatistic();
-    commonFilmsContainer.innerHTML = ``;
-    renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
+    if (target.id !== FiltersId.STATS) {
+      const filteredFilms = filterFilms(films, target.id);
+      clearSearchContainer();
+      changeClassForActiveFilter(target);
+      hideStatistic();
+      commonFilmsContainer.innerHTML = ``;
+      removeListeners(films);
+      renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
+    }
   };
 
   filtersList.forEach((item) => {
@@ -209,9 +196,39 @@ const initFilters = (films) => {
   });
 };
 
-function onLoaderClick(evt) {
-  evt.preventDefault();
-  loadMoreFilms(FILMS_PER_LOAD);
-}
+const onLoaderClick = (films) => {
+  return function () {
+    event.preventDefault();
+    const newVisibleFilms = Provider.get().loadMoreFilms(films, FILMS_PER_LOAD);
+    clearSearchContainer();
+    removeListeners(newVisibleFilms);
+    clearAndRenderFilms(newVisibleFilms);
+    setCountFilmForFilter(newVisibleFilms);
+    updateProfileRating(newVisibleFilms);
+    if (newVisibleFilms.length === allFilmsInProvider.length) {
+      filmsLoader.classList.add(`visually-hidden`);
+    }
+  };
+};
 
-filmsLoader.addEventListener(`click`, onLoaderClick);
+showLoadingMessage(Message.LOADING);
+
+Provider.get().getFilms()
+  .then((films) => {
+    hideLoadingMessage();
+    allFilmsInProvider = films;
+    let visibleFilms = Provider.get().loadMoreFilms(films, FILMS_PER_LOAD);
+    clearAndRenderFilms(visibleFilms);
+    renderFilters(FILTERS);
+    setCountFilmForFilter(visibleFilms);
+    initSearch(visibleFilms);
+    updateProfileRating(visibleFilms);
+    initFilters(visibleFilms);
+    setupFooterStatistics(allFilmsInProvider);
+    filmsLoader.addEventListener(`click`, onLoaderClick(films));
+  })
+  .catch(() => {
+    showLoadingMessage(Message.ERROR);
+  });
+
+statsBtn.addEventListener(`click`, showStatistic);

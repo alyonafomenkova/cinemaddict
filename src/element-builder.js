@@ -225,12 +225,19 @@ class ElementBuilder {
       </li>`).join(``);
   }
 
-  static templateForFilters(id, name, count, isChecked = false) {
+  static templateForFilters(id, name, isChecked = false) {
     return `
       <a id=${id} href="#${name.toLowerCase().split(` `).slice(0, 1)}" class="main-navigation__item ${isChecked ? ` main-navigation__item--active` : ``}">
-        ${name}
-        ${count ? `<span class="main-navigation__item-count">${count}</span>` : ``}
+        ${name}${(id !== `all`) ? `<span class="main-navigation__item-count ${id}-count"></span>` : ``}
       </a>`.trim();
+  }
+
+  static templateForSearch() {
+    return `
+      <form class="search">
+        <input type="text" name="search" class="search__field" placeholder="Search">
+        <button type="submit" class="visually-hidden">Search</button>
+      </form>`.trim();
   }
 
   static buildSmallFilmElement(group, film, clickListener) {
@@ -265,12 +272,6 @@ class ElementBuilder {
     element.clickableArea = checkExists(clickableArea, `Clickable area '${clickableAreaName}' not found`);
     element.clickableArea.addEventListener(`click`, clickListener);
     element.areaClickListener = clickListener;
-  }
-
-  static removeClickListener(element) {
-    const clickListener = element.areaClickListener;
-    const clickableArea = element.clickableArea;
-    checkExists(clickableArea, `Clickable area '${clickableArea}' not found`).removeEventListener(`click`, clickListener);
   }
 
   static createOverlay() {

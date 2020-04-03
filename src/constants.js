@@ -1,5 +1,6 @@
 export const KeyCode = {
-  ENTER: 13
+  ENTER: 13,
+  ESC: 27
 };
 
 export const Group = {
@@ -7,6 +8,51 @@ export const Group = {
   TOP_RATED: 1,
   MOST_COMMENTED: 2
 };
+
+export const Rating = {
+  low: {
+    count: {
+      min: 1,
+      max: 10
+    },
+    name: `novice`,
+  },
+  medium: {
+    count: 20,
+    name: `fan`,
+  },
+  high: {
+    name: `movie buff`,
+  },
+};
+
+export const FiltersId = {
+  ALL: `all`,
+  WATCHLIST: `watchlist`,
+  HISTORY: `history`,
+  FAVORITES: `favorites`,
+  STATS: `stats`
+};
+
+export const FILTERS = [
+  {
+    id: FiltersId.ALL,
+    name: `All movies`,
+    isChecked: true
+  },
+  {
+    id: FiltersId.WATCHLIST,
+    name: `Watchlist`
+  },
+  {
+    id: FiltersId.HISTORY,
+    name: `History`
+  },
+  {
+    id: FiltersId.FAVORITES,
+    name: `Favorites`
+  }
+];
 
 export const ProviderEventType = {
   COMMENT_ADDED: `comment_added`,
@@ -19,6 +65,6 @@ export const ProviderEventType = {
 export const Message = {
   LOADING: `Loading moovies…`,
   ERROR: `Something went wrong while loading movies. Check your connection or try again later`,
-  FILTER: `Maybe at firs you'll add some films to this list?`,
-  SEARCH: `Unable to find ani movies on your request`,
+  COMMENT_ADDED: `Comment added`,
+  COMMENT_DELETED: `Comment deleted`
 };

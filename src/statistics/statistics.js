@@ -1,11 +1,12 @@
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import moment from 'moment';
-import {rank, createElement} from "../util";
+import {createElement, setUserRank} from '../util';
 
 class Statistics {
 
   constructor(films) {
+    this._userRank = ``;
     this._watchedFilms = films.filter((it) => it.isWatched);
     this._genreChart = null;
     this._genreResult = null;
@@ -17,7 +18,7 @@ class Statistics {
   get templateForStatistics() {
     return `
       <div>
-        <p class="statistic__rank">Your rank <span class="statistic__rank-label">${this._getRank(this._watchedFilms)}</span></p>
+        <p class="statistic__rank">Your rank <span class="statistic__rank-label">${this._updateUserRank(this._watchedFilms)}</span></p>
 
         <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters">
           <p class="statistic__filters-description">Show stats:</p>
@@ -48,7 +49,10 @@ class Statistics {
           </li>
           <li class="statistic__text-item">
             <h4 class="statistic__item-title">Total duration</h4>
-            <p class="statistic__item-text statistic__item-text--duration">${this._getDurationTemplate(this._watchedFilms)}</p>
+            <p class="statistic__item-text statistic__item-text--duration">
+            ${Math.floor(moment.duration(this._calculateTotalDuration(this._watchedFilms), `m`).asHours())}<span class="statistic__item-description">h</span>
+            ${moment.duration(this._calculateTotalDuration(this._watchedFilms), `m`).minutes()}<span class="statistic__item-description">m</span>
+          </p>
           </li>
           <li class="statistic__text-item">
             <h4 class="statistic__item-title">Top genre</h4>
@@ -68,47 +72,41 @@ class Statistics {
     return element;
   }
 
-  _getDataOfGenresForChart(array) {
+  _updateUserRank(films) {
+    this._userRank = setUserRank(films);
+    return this._userRank;
+  }
+
+  _getDataOfGenresForChart(watchedFilms) {
     let map = new Map();
 
-    for (let obj of array) {
-      let key = obj.genre;
-
-      if (map.has(key)) {
-        let number = map.get(key);
-        map.set(key, number + 1);
-      } else {
-        map.set(key, 1);
-      }
-    }
-
+    watchedFilms.forEach((film) => {
+      film.genre.forEach((currentGenre) => {
+        if (map.has(currentGenre)) {
+          let number = map.get(currentGenre);
+          map.set(currentGenre, number + 1);
+        } else {
+          map.set(currentGenre, 1);
+        }
+      });
+    });
     return map;
   }
 
   _getTopGenre(watchedFilms) {
     const genresMap = this._getDataOfGenresForChart(watchedFilms);
-    if (genresMap.size === 0) return ``;
+    if (genresMap.size === 0) {
+      return ``;
+    }
     const maxPair = [...genresMap.entries()].reduce((prev, curr) => curr[1] > prev[1] ? curr : prev);
     const topGenre = maxPair[0];
     return topGenre;
   }
 
-  _getRank(watchedFilms) {
-    const genre = this._getTopGenre(watchedFilms);
-    return `${genre ? rank[genre] : `watch some movies`}`;
-  }
-
-  _getDurationTemplate(watchedFilms) {
+  _calculateTotalDuration(watchedFilms) {
     const allDurations = watchedFilms.map((it) => it.duration);
     const totalDuration = allDurations.reduce((a, b) => a + b, 0);
-    const hours = moment.duration(totalDuration).hours();
-    const minutes = moment.duration(totalDuration).minutes();
-    return `
-      ${hours}
-      <span class="statistic__item-description">h</span>
-      ${minutes}
-      <span class="statistic__item-description">m</span>
-    `;
+    return totalDuration;
   }
 
   _getChartData(watchedFilms) {
@@ -148,9 +146,9 @@ class Statistics {
     const filteredFilms = this._filterByTime(filter);
     this._genreChart.destroy();
     this._createChart(filteredFilms);
-    document.querySelector(`.statistic__rank-label`).innerHTML = this._getRank(filteredFilms);
+    document.querySelector(`.statistic__rank-label`).innerHTML = this._updateUserRank(filteredFilms);
     document.querySelector(`.statistic__item-text--count`).innerHTML = filteredFilms.length;
-    document.querySelector(`.statistic__item-text--duration`).innerHTML = this._getDurationTemplate(filteredFilms);
+    document.querySelector(`.statistic__item-text--duration`).innerHTML = this._calculateTotalDuration(filteredFilms);
     document.querySelector(`.statistic__item-text--top-genre`).innerHTML = this._getTopGenre(filteredFilms);
   }
 

@@ -1,5 +1,6 @@
-import {ProviderEventType, KeyCode} from "./constants";
-import {Provider} from "./provider.js";
+import {ProviderEventType, KeyCode, Message} from './constants';
+import {setSmallCardCommentsCount} from './small-film';
+import {Provider} from './provider.js';
 import {ElementBuilder} from './element-builder.js';
 import moment from 'moment';
 
@@ -21,12 +22,21 @@ const shake = (element) => {
   }, ANIMATION_TIMEOUT);
 };
 
-function addComment(film) {
+export const hideCommentControls = (detailedFilmComponent) => {
+  const statusUserControl = detailedFilmComponent.querySelector(`.film-details__watched-status`);
+  const undoCommentButton = detailedFilmComponent.querySelector(`.film-details__watched-reset`);
+  statusUserControl.innerHTML = ``;
+  undoCommentButton.classList.add(`visually-hidden`);
+};
+
+const addComment = (film) => {
   return function () {
     const textInput = document.querySelector(`.film-details__comment-input`);
     const commentsList = document.querySelector(`.film-details__comments-list`);
 
     if (event.ctrlKey && event.keyCode === KeyCode.ENTER && textInput.value) {
+      const statusUserControl = document.querySelector(`.film-details__watched-status`);
+      const undoCommentButton = document.querySelector(`.film-details__watched-reset`);
       const provider = Provider.get();
       const newComment = {};
       const emoji = document.querySelector(`.film-details__add-emoji`);
@@ -37,14 +47,19 @@ function addComment(film) {
       textInput.disabled = true;
       textInput.style.border = `none`;
       provider.addComment(film.id, newComment)
+      // eslint-disable-next-line no-shadow
         .then((film) => {
           emoji.checked = false;
           commentsList.innerHTML = ElementBuilder.templateForComments(film);
           setDetailedCardCommentsCount(film.comments.length);
           textInput.value = ``;
           textInput.disabled = false;
+          statusUserControl.innerHTML = Message.COMMENT_ADDED;
+          undoCommentButton.classList.remove(`visually-hidden`);
+          undoCommentButton.addEventListener(`click`, deleteLastComment(film, statusUserControl));
         })
         .catch((error) => {
+          // eslint-disable-next-line no-console
           console.log(error);
           textInput.style.border = `5px solid red`;
           shake(textInput);
@@ -52,9 +67,29 @@ function addComment(film) {
         });
     }
   };
-}
+};
 
-function getEmoji(emo) {
+const deleteLastComment = (film, statusUserControl) => {
+  return function () {
+    const commentsList = document.querySelector(`.film-details__comments-list`);
+    const undoCommentButton = document.querySelector(`.film-details__watched-reset`);
+    film.comments.pop();
+    Provider.get().updateFilm({id: film.id, data: film})
+      .then(() => {
+        commentsList.innerHTML = ElementBuilder.templateForComments(film);
+        setDetailedCardCommentsCount(film.comments.length);
+        setSmallCardCommentsCount(film, film.comments.length);
+        statusUserControl.innerHTML = Message.COMMENT_DELETED;
+        undoCommentButton.classList.add(`visually-hidden`);
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.log(error);
+      });
+  };
+};
+
+const getEmoji = (emo) => {
   const emoji = {
     "grinning": `😀`,
     "sleeping": `😴`,
@@ -62,22 +97,22 @@ function getEmoji(emo) {
     "neutral-face": `😐`,
   };
   return emoji[emo];
-}
+};
 
-function changeEmoji(detailedFilmComponent) {
+const changeEmoji = (detailedFilmComponent) => {
   return function () {
     const emoji = detailedFilmComponent.querySelector(`.film-details__emoji-item:checked + label`).textContent;
     detailedFilmComponent.querySelector(`.film-details__add-emoji-label`).innerHTML = emoji;
   };
-}
+};
 
-function toggleCheckedButton(detailedFilmComponent, targetInput) {
+const toggleCheckedButton = (detailedFilmComponent, targetInput) => {
   const buttons = detailedFilmComponent.querySelectorAll(`.film-details__user-rating-label`);
   buttons.forEach((button) => button.style.backgroundColor = `#d8d8d8`);
   targetInput.style.backgroundColor = (`#ffe800`);
-}
+};
 
-function changeRating(film, detailedFilmComponent) {
+const changeRating = (film, detailedFilmComponent) => {
   return function () {
     event.preventDefault();
     const targetButton = event.target;
@@ -97,6 +132,7 @@ function changeRating(film, detailedFilmComponent) {
         userRatingForm.style.pointerEvents = `auto`;
       })
       .catch((error) => {
+        // eslint-disable-next-line no-console
         console.log(error);
         userRatingForm.style.border = `1px solid red`;
         shake(userRatingForm);
@@ -104,25 +140,25 @@ function changeRating(film, detailedFilmComponent) {
         userRatingForm.style.pointerEvents = `auto`;
       });
   };
-}
+};
 
-function changeWatchlist(film) {
+const changeWatchlist = (film) => {
   return function () {
     Provider.get().changeWatchlist(film.id);
   };
-}
+};
 
-function changeWatched(film) {
+const changeWatched = (film) => {
   return function () {
     Provider.get().changeWatched(film.id);
   };
-}
+};
 
-function changeFavorite(film) {
+const changeFavorite = (film) => {
   return function () {
     Provider.get().changeFavorite(film.id);
   };
-}
+};
 
 const observeProviderSmallFilm = (evt, film, detailedFilmComponent) => {
   if (evt.type === ProviderEventType.WATCHLIST_CHANGED && evt.filmId === film.id) {
