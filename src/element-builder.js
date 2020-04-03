@@ -274,12 +274,6 @@ class ElementBuilder {
     element.areaClickListener = clickListener;
   }
 
-  static removeClickListener(element) {
-    const clickListener = element.areaClickListener;
-    const clickableArea = element.clickableArea;
-    checkExists(clickableArea, `Clickable area '${clickableArea}' not found`).removeEventListener(`click`, clickListener);
-  }
-
   static createOverlay() {
     const template = `<div style="position:absolute;opacity:0.5;width:100%;height:100%;top:0;left:0;z-index:2;background:transparent;"></div>`;
     const overlay = createElement(template);

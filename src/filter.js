@@ -1,33 +1,6 @@
 import {ElementBuilder} from './element-builder.js';
-import {Provider} from "./provider";
-
-export const FiltersId = {
-  ALL: `all`,
-  WATCHLIST: `watchlist`,
-  HISTORY: `history`,
-  FAVORITES: `favorites`,
-  STATS: `stats`
-};
-
-export const FILTERS = [
-  {
-    id: FiltersId.ALL,
-    name: `All movies`,
-    isChecked: true
-  },
-  {
-    id: FiltersId.WATCHLIST,
-    name: `Watchlist`
-  },
-  {
-    id: FiltersId.HISTORY,
-    name: `History`
-  },
-  {
-    id: FiltersId.FAVORITES,
-    name: `Favorites`
-  }
-];
+import {Provider} from './provider';
+import {FiltersId} from './constants';
 
 const filtersContainer = document.querySelector(`.main-navigation`);
 export let filtersList;

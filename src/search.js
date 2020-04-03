@@ -1,7 +1,7 @@
 import {ElementBuilder} from './element-builder.js';
 import {createElement} from './util.js';
 import {commonFilmsContainer, renderFilms} from './main.js';
-import {Group} from "./constants";
+import {Group} from './constants';
 
 const searchContainer = document.querySelector(`.header__search`);
 

@@ -27,15 +27,11 @@ const Provider = class {
 
   addListener(name, listener) {
     this._listeners.set(name, listener);
-    // eslint-disable-next-line no-console
-    console.log(`[PROVIDER] Total ${this._listeners.size} listeners`);
   }
 
   removeListener(name) {
     if (this._listeners.has(name)) {
       this._listeners.delete(name);
-      // eslint-disable-next-line no-console
-      console.log(`[PROVIDER] Total ${this._listeners.size} listeners`);
     } else {
       // eslint-disable-next-line no-console
       console.log(`[PROVIDER] Unknown name: ${name}`);
@@ -236,21 +232,6 @@ const Provider = class {
     }
   }
 
-  createFilm({film}) {
-    if (this._isOnline()) {
-      return this._network.createFilm({film})
-        .then((film) => {
-          this._storage.setItem({key: film.id, item: film.toRAW()});
-          return film;
-        });
-    } else {
-      film.id = this._generateId();
-      this._needSync = true;
-      this._storage.setItem({key: film.id, item: film.toRAW()});
-      return Promise.resolve(Adapter.parseFilm(film));
-    }
-  }
-
   updateFilm({id, data}) {
     if (this._isOnline()) {
       return this._network.updateFilm({id, data})
@@ -265,19 +246,6 @@ const Provider = class {
       this._storage.setItem({key: film.id, item: film.toRAW()});
       this._renderedFilms[data.id] = data;
       return Promise.resolve(film);
-    }
-  }
-
-  deleteFilm({id}) {
-    if (this._isOnline()) {
-      return this._network.deleteFilm({id})
-        .then(() => {
-          this._storage.removeItem({key: id});
-        });
-    } else {
-      this._needSync = true;
-      this._storage.removeItem({key: id});
-      return Promise.resolve(true);
     }
   }
 

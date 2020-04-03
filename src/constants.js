@@ -26,6 +26,34 @@ export const Rating = {
   },
 };
 
+export const FiltersId = {
+  ALL: `all`,
+  WATCHLIST: `watchlist`,
+  HISTORY: `history`,
+  FAVORITES: `favorites`,
+  STATS: `stats`
+};
+
+export const FILTERS = [
+  {
+    id: FiltersId.ALL,
+    name: `All movies`,
+    isChecked: true
+  },
+  {
+    id: FiltersId.WATCHLIST,
+    name: `Watchlist`
+  },
+  {
+    id: FiltersId.HISTORY,
+    name: `History`
+  },
+  {
+    id: FiltersId.FAVORITES,
+    name: `Favorites`
+  }
+];
+
 export const ProviderEventType = {
   COMMENT_ADDED: `comment_added`,
   USER_RATING_CHANGED: `user_rating_changed`,

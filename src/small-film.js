@@ -6,26 +6,26 @@ export const setSmallCardCommentsCount = (film, count) => {
   commentsCountField.innerHTML = count + ` comments`;
 };
 
-export function changeWatchlistOnSmallFilm(film) {
+export const changeWatchlistOnSmallFilm = (film) => {
   return function () {
     event.preventDefault();
     Provider.get().changeWatchlist(film.id);
   };
-}
+};
 
-export function changeWatchedOnSmallFilm(film) {
+export const changeWatchedOnSmallFilm = (film) => {
   return function () {
     event.preventDefault();
     Provider.get().changeWatched(film.id);
   };
-}
+};
 
-export function changeFavoriteOnSmallFilm(film) {
+export const changeFavoriteOnSmallFilm = (film) => {
   return function () {
     event.preventDefault();
     Provider.get().changeFavorite(film.id);
   };
-}
+};
 
 const updateBtnStatus = (status, btn) => {
   if (status) {

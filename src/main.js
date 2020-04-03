@@ -1,5 +1,5 @@
-import {getRandomNumber, getShuffledSubarray, getSubarray, setUserRank} from './util.js';
-import {FiltersId, FILTERS, filtersList, renderFilters, setCountFilmForFilter, changeClassForActiveFilter, filterFilms, observeCountFilms} from './filter.js';
+import {setUserRank} from './util.js';
+import {filtersList, renderFilters, setCountFilmForFilter, changeClassForActiveFilter, filterFilms, observeCountFilms} from './filter.js';
 import {clearSearchContainer, initSearch} from './search.js';
 import {FilmStorage} from './film-storage.js';
 import {Network} from './network';
@@ -7,8 +7,8 @@ import {ElementBuilder} from './element-builder.js';
 import {Provider} from './provider.js';
 import {Statistics} from './statistics/statistics.js';
 import {hideStatistic} from './statistics/statistics-setup.js';
-import {Group, KeyCode, ProviderEventType, Rating} from './constants';
-import {createFilmComponent, observeProviderDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
+import {Group, KeyCode, FiltersId, FILTERS, ProviderEventType, Rating} from './constants';
+import {observeProviderDetailedFilm, changeWatchlistOnSmallFilm, changeWatchedOnSmallFilm, changeFavoriteOnSmallFilm} from './small-film';
 import {hideCommentControls, changeEmoji, addComment, changeRating, changeWatchlist, changeWatched, changeFavorite, observeProviderSmallFilm} from './detailed-film';
 import moment from "moment";
 
@@ -201,6 +201,12 @@ function clearAndRenderFilms(visibleFilms) {
   renderFilms(mostCommentedFilmsContainer, getCommentedFilms(visibleFilms), Group.MOST_COMMENTED);
 }
 
+const removeListeners = (films) => {
+  films.forEach((film) => {
+    Provider.get().removeListener(`small_` + film.id);
+  });
+};
+
 const initFilters = (films) => {
   const onFiltersClick = (evt) => {
     evt.preventDefault();
@@ -211,6 +217,7 @@ const initFilters = (films) => {
       changeClassForActiveFilter(target);
       hideStatistic();
       commonFilmsContainer.innerHTML = ``;
+      removeListeners(films);
       renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
     }
   };
@@ -223,9 +230,7 @@ const initFilters = (films) => {
 function onLoaderClick(films) {
   return function () {
     event.preventDefault();
-    films.forEach((film) => {
-      Provider.get().removeListener(`small_` + film.id);
-    });
+    removeListeners(films);
     const newVisibleFilms = Provider.get().loadMoreFilms(films, FILMS_PER_LOAD);
     clearSearchContainer();
     clearAndRenderFilms(newVisibleFilms);

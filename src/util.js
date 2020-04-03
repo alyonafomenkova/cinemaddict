@@ -1,29 +1,4 @@
-import {Provider} from "./provider";
-import {Rating} from "./constants";
-
-export const getRandomNumber = (min, max) => min + Math.floor(Math.random() * (max + 1 - min));
-
-export const getRandomElement = (array) => {
-  const rand = Math.floor(Math.random() * array.length);
-  return array[rand];
-};
-
-const shuffleArray = (array) => {
-  for (let i = array.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-};
-
-export const getShuffledSubarray = (array, numberOfElements) => {
-  const shuffledArr = shuffleArray(array);
-  return shuffledArr.slice(0, numberOfElements);
-};
-
-export const getSubarray = (array, numberOfElements) => {
-  return array.slice(0, numberOfElements);
-};
+import {Rating} from './constants';
 
 export const createElement = (template) => {
   const newElement = document.createElement(`div`);
@@ -36,10 +11,6 @@ export const checkExists = (value, message) => {
     throw new Error(message);
   }
   return value;
-};
-
-export const getRandomDate = (start, end) => {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 };
 
 export const objectToArray = (object) => {
