@@ -1,11 +1,12 @@
 import {ElementBuilder} from './element-builder.js';
 import {Provider} from "./provider";
 
-const FiltersId = {
+export const FiltersId = {
   ALL: `all`,
   WATCHLIST: `watchlist`,
   HISTORY: `history`,
-  FAVORITES: `favorites`
+  FAVORITES: `favorites`,
+  STATS: `stats`
 };
 
 export const FILTERS = [

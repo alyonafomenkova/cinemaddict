@@ -1,4 +1,4 @@
-import {FilmStorage} from "../film-storage";
+import {Provider} from "../provider";
 import {Statistics} from './statistics.js';
 
 const statsBtn = document.querySelector(`.main-navigation__item--additional`);
@@ -6,7 +6,7 @@ const statsContainer = document.querySelector(`.statistic`);
 const filmsContainer = document.querySelector(`.films`);
 
 const showStatistic = () => {
-  const films = FilmStorage.get().getFilms();
+  const films = Provider.get().getRenderedFilms();
   const statsComponent = new Statistics(films);
   filmsContainer.classList.add(`visually-hidden`);
   statsContainer.innerHTML = ``;

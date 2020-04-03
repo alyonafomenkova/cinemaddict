@@ -1,6 +1,6 @@
 import {CountOfFilms, generateFilms} from './data.js';
 import {getRandomNumber, getShuffledSubarray, getSubarray, setUserRank} from './util.js';
-import {FILTERS, filtersList, renderFilters, setCountFilmForFilter, changeClassForActiveFilter, filterFilms, observeCountFilms} from './filter.js';
+import {FiltersId, FILTERS, filtersList, renderFilters, setCountFilmForFilter, changeClassForActiveFilter, filterFilms, observeCountFilms} from './filter.js';
 import {clearSearchContainer, initSearch} from './search.js';
 import {FilmStorage} from './film-storage.js';
 import {Network} from './network';
@@ -206,12 +206,14 @@ const initFilters = (films) => {
   const onFiltersClick = (evt) => {
     evt.preventDefault();
     const target = evt.target;
-    const filteredFilms = filterFilms(films, target.id);
-    clearSearchContainer();
-    changeClassForActiveFilter(target);
-    hideStatistic();
-    commonFilmsContainer.innerHTML = ``;
-    renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
+    if (target.id !== FiltersId.STATS) {
+      const filteredFilms = filterFilms(films, target.id);
+      clearSearchContainer();
+      changeClassForActiveFilter(target);
+      hideStatistic();
+      commonFilmsContainer.innerHTML = ``;
+      renderFilms(commonFilmsContainer, filteredFilms, Group.ALL);
+    }
   };
 
   filtersList.forEach((item) => {
