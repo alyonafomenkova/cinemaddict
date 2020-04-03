@@ -1,15 +1,5 @@
-
-export const rank = {
-  'comedy': `Jim Carrey`,
-  'drama': `Julia Roberts`,
-  'horror': `Freddy Krueger`,
-  'action': `Sylvester Stallone`,
-  'adventure': `Johnny Depp`,
-  'war': `Anthony Quinn`,
-  'musical': `Yekaterina Guseva`,
-  'historical': `Marilyn Monroe`,
-  'science': `Doctor Who`
-};
+import {Provider} from "./provider";
+import {Rating} from "./constants";
 
 export const getRandomNumber = (min, max) => min + Math.floor(Math.random() * (max + 1 - min));
 
@@ -54,4 +44,19 @@ export const getRandomDate = (start, end) => {
 
 export const objectToArray = (object) => {
   return Object.keys(object).map((id) => object[id]);
+};
+
+export const setUserRank = (films) => {
+  const count = (films.filter((film) => film.isWatched)).length;
+  let userRank = ``;
+  if (count < Rating.low.count.min) {
+    userRank = ``;
+  } else if (count <= Rating.low.count.max) {
+    userRank = Rating.low.name;
+  } else if (count <= Rating.medium.count) {
+    userRank = Rating.medium.name;
+  } else {
+    userRank = Rating.high.name;
+  }
+  return userRank;
 };

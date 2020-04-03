@@ -1,5 +1,5 @@
 import {CountOfFilms, generateFilms} from './data.js';
-import {getRandomNumber, getShuffledSubarray, getSubarray} from './util.js';
+import {getRandomNumber, getShuffledSubarray, getSubarray, setUserRank} from './util.js';
 import {FILTERS, filtersList, renderFilters, setCountFilmForFilter, changeClassForActiveFilter, filterFilms, observeCountFilms} from './filter.js';
 import {clearSearchContainer, initSearch} from './search.js';
 import {FilmStorage} from './film-storage.js';
@@ -35,19 +35,8 @@ window.addEventListener(`online`, () => {
   Provider.get().syncFilms();
 });
 
-const updateProfileRating = () => {
-  const films = Provider.get().getRenderedFilms();
-  const count = (films.filter((film) => film.isWatched)).length;
-
-  if (count < Rating.low.count.min) {
-    profileRating.textContent = ``;
-  } else if (count <= Rating.low.count.max) {
-    profileRating.textContent = Rating.low.name;
-  } else if (count <= Rating.medium.count) {
-    profileRating.textContent = Rating.medium.name;
-  } else {
-    profileRating.textContent = Rating.high.name;
-  }
+const updateProfileRating = (films) => {
+  profileRating.textContent = setUserRank(films);
 };
 
 const setupFooterStatistics = (allFilms) => {
@@ -83,7 +72,6 @@ export const renderFilms = (container, filmsArray, group) => {
 
     const onEscPress = (evt) => {
       if (evt.keyCode === KeyCode.ESC) {
-        console.log("ABC123");
         removeDetailedFilmComponent();
       }
     };
@@ -97,11 +85,8 @@ export const renderFilms = (container, filmsArray, group) => {
       const watchedInput = detailedFilmComponent.querySelector(`#watched`);
       const favoriteInput = detailedFilmComponent.querySelector(`#favorite`);
       body.appendChild(overlay);
-      console.log("appending: ", detailedFilmComponent);//
       body.appendChild(detailedFilmComponent);
       hideCommentControls(detailedFilmComponent);
-
-      document.addEventListener(`keydown`, onEscPress);
 
       changeEmojiListener = changeEmoji(detailedFilmComponent);
       commentAddListener = addComment(film);
@@ -110,6 +95,7 @@ export const renderFilms = (container, filmsArray, group) => {
       changeWatchedListener = changeWatched(film);
       changeFavoriteListener = changeFavorite(film);
 
+      document.addEventListener(`keydown`, onEscPress);
       emoji.addEventListener(`click`, changeEmojiListener);
       commentsArea.addEventListener(`keydown`, commentAddListener);
       ratingArea.addEventListener(`click`, changeRatingListener);
@@ -135,23 +121,30 @@ export const renderFilms = (container, filmsArray, group) => {
     changeFavoriteListener = changeFavoriteOnSmallFilm(film);
     container.appendChild(filmComponent);
 
-    console.log("ADD listener small_" + film.id);
-    Provider.get().addListener("small_" + film.id, (evt) => {
+    const listener = (evt) => {
       observeProviderDetailedFilm(evt, film, filmComponent);
       observeProviderSmallFilm(evt, film, detailedFilmComponent);
       observeCountFilms();
-      updateProfileRating();
-    });
+      updateProfileRating(filmsArray);
+    };
+    if (group === Group.TOP_RATED) {
+      Provider.get().addListener(`rated_` + film.id, listener);
+    } else if (group === Group.MOST_COMMENTED) {
+      Provider.get().addListener(`commented_` + film.id, listener);
+    } else {
+      Provider.get().addListener(`small_` + film.id, listener);
+    }
     watchlistBtn.addEventListener(`click`, changeWatchlistListener);
     watchedBtn.addEventListener(`click`, changeWatchedListener);
     favoriteBtn.addEventListener(`click`, changeFavoriteListener);
   });
 };
 
+
 // /// STATISTICS /////
 import {statsBtn, showStatistic} from './statistics/statistics-setup.js';
 import {Message} from './constants.js';
-statsBtn.addEventListener(`click`, showStatistic);
+
 
 // /// SERVER /////
 
@@ -187,12 +180,11 @@ Provider.get().getFilms()
     hideLoadingMessage();
     allFilmsInProvider = films;
     let visibleFilms = Provider.get().loadMoreFilms(films, FILMS_PER_LOAD);
-    console.log(`visibleFilms: `, visibleFilms);
     clearAndRenderFilms(visibleFilms);
     renderFilters(FILTERS);
     setCountFilmForFilter(visibleFilms);
     initSearch(visibleFilms);
-    updateProfileRating();
+    updateProfileRating(visibleFilms);
     initFilters(visibleFilms);
     setupFooterStatistics(allFilmsInProvider);
     filmsLoader.addEventListener(`click`, onLoaderClick(films));
@@ -205,13 +197,9 @@ function clearAndRenderFilms(visibleFilms) {
   commonFilmsContainer.innerHTML = ``;
   topRatedFilmsContainer.innerHTML = ``;
   mostCommentedFilmsContainer.innerHTML = ``;
-  visibleFilms.forEach((film) => {
-    Provider.get().removeListener("small_" + film.id);
-  });
-
   renderFilms(commonFilmsContainer, visibleFilms, Group.ALL);
-  //renderFilms(topRatedFilmsContainer, getRatedFilms(visibleFilms), Group.TOP_RATED);
-  //renderFilms(mostCommentedFilmsContainer, getCommentedFilms(visibleFilms), Group.MOST_COMMENTED);
+  renderFilms(topRatedFilmsContainer, getRatedFilms(visibleFilms), Group.TOP_RATED);
+  renderFilms(mostCommentedFilmsContainer, getCommentedFilms(visibleFilms), Group.MOST_COMMENTED);
 }
 
 const initFilters = (films) => {
@@ -234,13 +222,18 @@ const initFilters = (films) => {
 function onLoaderClick(films) {
   return function () {
     event.preventDefault();
+    films.forEach((film) => {
+      Provider.get().removeListener(`small_` + film.id);
+    });
     const newVisibleFilms = Provider.get().loadMoreFilms(films, FILMS_PER_LOAD);
     clearSearchContainer();
     clearAndRenderFilms(newVisibleFilms);
     setCountFilmForFilter(newVisibleFilms);
-    updateProfileRating();
+    updateProfileRating(newVisibleFilms);
     if (newVisibleFilms.length === allFilmsInProvider.length) {
       filmsLoader.classList.add(`visually-hidden`);
     }
   };
 }
+
+statsBtn.addEventListener(`click`, showStatistic);
