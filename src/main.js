@@ -1,4 +1,3 @@
-import {CountOfFilms, generateFilms} from './data.js';
 import {getRandomNumber, getShuffledSubarray, getSubarray, setUserRank} from './util.js';
 import {FiltersId, FILTERS, filtersList, renderFilters, setCountFilmForFilter, changeClassForActiveFilter, filterFilms, observeCountFilms} from './filter.js';
 import {clearSearchContainer, initSearch} from './search.js';
